@@ -18,8 +18,9 @@
     <% if (user) { %>
     <div class="navbar-nav">
       <a href="/dashboard" class="active">Dashboard</a>
-      <a href="/products">Products</a>
+      <a href="/products">Select Products</a>
       <a href="/releases">Releases</a>
+      <a href="/my-checkouts">My Checkouts</a>
       
       <% if (user.isAdmin) { %>
       <a href="/admin">Admin</a>
@@ -39,6 +40,19 @@
   </nav>
 
   <main class="container">
+    <% if (typeof success_msg !== 'undefined' && success_msg.length > 0) { %>
+      <% success_msg.forEach(function(msg) { %>
+        <div class="alert alert-success">✓ <%= msg %></div>
+      <% }); %>
+    <% } %>
+    
+    <% if (typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
+      <% error_msg.forEach(function(msg) { %>
+        <div class="alert alert-danger">✕ <%= msg %></div>
+      <% }); %>
+    <% } %>
+
+    <% if (user) { %>
     <div class="hero">
       <h1>Welcome, <%= user.username %>! 👋</h1>
       <p>Your ACO Dashboard — Track products, releases, and checkouts</p>
@@ -58,55 +72,39 @@
         <div class="stat-label">🏴‍☠️ One Piece</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value"><%= checkouts.length %></div>
-        <div class="stat-label">📦 Your Checkouts</div>
+        <div class="stat-value"><%= selections ? selections.length : 0 %></div>
+        <div class="stat-label">✓ My Selections</div>
       </div>
     </div>
 
     <div class="grid grid-2 mt-3">
       <div class="card">
         <div class="card-header">
-          <h2 class="card-title">📦 Your Recent Checkouts</h2>
-          <a href="/products" class="btn btn-primary btn-sm">Add Checkout</a>
+          <h2 class="card-title">📦 My Product Selections</h2>
+          <a href="/products" class="btn btn-primary btn-sm">+ Add Products</a>
         </div>
         
-        <% if (checkouts.length > 0) { %>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Status</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% checkouts.forEach(function(checkout) { %>
-              <tr>
-                <td>
-                  <% if (checkout.product_name) { %>
-                    <%= checkout.product_name %>
-                  <% } else if (checkout.sku) { %>
-                    <code><%= checkout.sku %></code>
-                  <% } else { %>
-                    Unknown Product
-                  <% } %>
-                </td>
-                <td>
-                  <span class="badge badge-<%= checkout.status === 'success' ? 'success' : (checkout.status === 'pending' ? 'warning' : 'danger') %>">
-                    <%= checkout.status %>
-                  </span>
-                </td>
-                <td><%= new Date(checkout.created_at).toLocaleDateString() %></td>
-              </tr>
-              <% }); %>
-            </tbody>
-          </table>
-        </div>
+        <% if (selections && selections.length > 0) { %>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <% selections.forEach(function(sel) { %>
+            <div class="checkout-item-card">
+              <div class="checkout-item-details">
+                <div class="checkout-item-name"><%= sel.product_name %></div>
+                <div class="checkout-item-meta">
+                  Qty: <%= sel.quantity === 'No Limit' ? 'No Limit' : sel.quantity %>
+                </div>
+              </div>
+              <form action="/selections/<%= sel.id %>" method="DELETE" style="display: inline;">
+                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+              </form>
+            </div>
+            <% }); %>
+          </div>
         <% } else { %>
         <div class="empty-state">
           <div class="empty-state-icon">📦</div>
-          <p>No checkouts yet. <a href="/products">Browse products</a> to get started!</p>
+          <p>No products selected yet.</p>
+          <a href="/products" class="btn btn-primary mt-2">Browse Products</a>
         </div>
         <% } %>
       </div>
@@ -118,7 +116,7 @@
         </div>
         
         <% if (releases.length > 0) { %>
-          <% releases.slice(0, 5).forEach(function(release) { %>
+          <% releases.slice(0, 3).forEach(function(release) { %>
           <div class="release-card">
             <div class="release-date">📅 <%= new Date(release.release_date).toLocaleDateString() %></div>
             <div class="release-name"><%= release.name %></div>
@@ -130,7 +128,7 @@
         <% } else { %>
         <div class="empty-state">
           <div class="empty-state-icon">📅</div>
-          <p>No upcoming releases scheduled.</p>
+          <p>No upcoming releases.</p>
         </div>
         <% } %>
       </div>
@@ -141,13 +139,36 @@
         <h2 class="card-title">⚡ Quick Actions</h2>
       </div>
       <div class="d-flex gap-2 flex-wrap">
-        <a href="/products" class="btn btn-primary">Browse Products</a>
+        <a href="/products" class="btn btn-primary">Select Products</a>
         <a href="/releases" class="btn btn-secondary">View Releases</a>
+        <a href="/my-checkouts" class="btn btn-outline">My Checkouts</a>
         <% if (user.isAdmin) { %>
         <a href="/admin" class="btn btn-outline">Admin Panel</a>
         <% } %>
       </div>
     </div>
+    <% } else { %>
+    <div class="hero">
+      <h1>⚡ ACO Dashboard</h1>
+      <p>Your automated checkout command center. Track products, manage releases, and monitor checkouts all in one place.</p>
+      <a href="/login" class="btn btn-primary btn-lg">Login with Discord</a>
+    </div>
+
+    <div class="grid grid-3">
+      <div class="stat-card">
+        <div class="stat-value" style="font-size: 2rem;">🎴</div>
+        <div class="stat-label">Pokemon Products</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="font-size: 2rem;">🏀</div>
+        <div class="stat-label">Sports Cards</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="font-size: 2rem;">🏴‍☠️</div>
+        <div class="stat-label">One Piece TCG</div>
+      </div>
+    </div>
+    <% } %>
   </main>
 
   <footer class="footer">

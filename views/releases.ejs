@@ -17,8 +17,9 @@
     
     <div class="navbar-nav">
       <a href="/dashboard">Dashboard</a>
-      <a href="/products">Products</a>
+      <a href="/products">Select Products</a>
       <a href="/releases" class="active">Releases</a>
+      <a href="/my-checkouts">My Checkouts</a>
       
       <% if (user.isAdmin) { %>
       <a href="/admin">Admin</a>
@@ -40,6 +41,9 @@
     <div class="card">
       <div class="card-header">
         <h2 class="card-title">📅 Upcoming Releases</h2>
+        <% if (user.isAdmin) { %>
+        <button class="btn btn-primary btn-sm" onclick="openReleaseModal()">+ Create Release</button>
+        <% } %>
       </div>
       
       <% if (releases.length > 0) { %>
@@ -59,10 +63,13 @@
           <p class="release-description"><%= release.description %></p>
           <% } %>
           
-          <div class="mt-2">
+          <div class="d-flex gap-2 mt-2" style="flex-wrap: wrap;">
             <span class="badge badge-info">
-              <%= Math.ceil((new Date(release.release_date) - new Date()) / (1000 * 60 * 60 * 24)) %> days until release
+              <%= Math.ceil((new Date(release.release_date) - new Date()) / (1000 * 60 * 60 * 24)) %> days away
             </span>
+            <% if (release.signup_count !== undefined) { %>
+            <span class="badge badge-success"><%= release.signup_count %> Signed Up</span>
+            <% } %>
           </div>
         </div>
         <% }); %>
@@ -76,23 +83,23 @@
 
     <div class="card mt-2">
       <div class="card-header">
-        <h3 class="card-title">✨ How It Works</h3>
+        <h3 class="card-title">✨ How Signups Work</h3>
       </div>
       <div class="grid grid-3">
         <div style="text-align: center; padding: 1.5rem;">
           <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">1️⃣</div>
-          <h4 style="margin-bottom: 0.5rem;">Check Releases</h4>
-          <p style="color: var(--text-secondary); font-size: 0.875rem;">Browse upcoming product releases and their dates</p>
+          <h4 style="margin-bottom: 0.5rem;">Select Items</h4>
+          <p style="color: var(--text-secondary); font-size: 0.875rem;">Browse releases and select the items you want with quantities</p>
         </div>
         <div style="text-align: center; padding: 1.5rem;">
           <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">2️⃣</div>
-          <h4 style="margin-bottom: 0.5rem;">Sign Up</h4>
-          <p style="color: var(--text-secondary); font-size: 0.875rem;">Click the sign up button to access the Google Form</p>
+          <h4 style="margin-bottom: 0.5rem;">Fill Out Form</h4>
+          <p style="color: var(--text-secondary); font-size: 0.875rem;">Complete the Google Form with your max price and payment info</p>
         </div>
         <div style="text-align: center; padding: 1.5rem;">
           <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">3️⃣</div>
           <h4 style="margin-bottom: 0.5rem;">Get Notified</h4>
-          <p style="color: var(--text-secondary); font-size: 0.875rem;">Fill out the form to be notified when the release drops</p>
+          <p style="color: var(--text-secondary); font-size: 0.875rem;">We'll notify you when the release drops and your items are secured</p>
         </div>
       </div>
     </div>
@@ -102,6 +109,57 @@
     <p>⚡ ACO Dashboard — Automated Checkout Services</p>
   </footer>
 
+  <% if (user.isAdmin) { %>
+  <!-- Admin: Create Release Modal -->
+  <div class="modal-overlay" id="releaseModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Create New Release</h3>
+        <button class="modal-close" onclick="closeReleaseModal()">×</button>
+      </div>
+      <form action="/admin/releases" method="POST">
+        <div class="form-group">
+          <label class="form-label">Release Name *</label>
+          <input type="text" class="form-control" name="name" required placeholder="e.g., Pokemon SV151 Release">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Release Date *</label>
+          <input type="datetime-local" class="form-control" name="release_date" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Google Signup Form URL *</label>
+          <input type="url" class="form-control" name="google_form_url" required placeholder="https://forms.google.com/...">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" name="description" rows="3" placeholder="Details about this release..."></textarea>
+        </div>
+        
+        <div class="d-flex gap-2 justify-between mt-3">
+          <button type="button" class="btn btn-secondary" onclick="closeReleaseModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Release</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <% } %>
+
   <script src="/js/app.js"></script>
+  <% if (user.isAdmin) { %>
+  <script>
+  function openReleaseModal() {
+    document.getElementById('releaseModal').classList.add('active');
+  }
+  function closeReleaseModal() {
+    document.getElementById('releaseModal').classList.remove('active');
+  }
+  document.getElementById('releaseModal').addEventListener('click', function(e) {
+    if (e.target === this) closeReleaseModal();
+  });
+  </script>
+  <% } %>
 </body>
 </html>

@@ -45,6 +45,8 @@ async function initDatabase() {
       category TEXT NOT NULL,
       description TEXT,
       active INTEGER DEFAULT 1,
+      tcin TEXT,
+      image TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -76,6 +78,17 @@ async function initDatabase() {
   `);
   
   db.run(`
+  db.run(`
+    CREATE TABLE IF NOT EXISTS product_selections (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      product_id TEXT NOT NULL,
+      quantity TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id),
+      FOREIGN KEY (product_id) REFERENCES products(id)
+    )
+  `);
     CREATE TABLE IF NOT EXISTS release_signups (
       id TEXT PRIMARY KEY,
       release_id TEXT NOT NULL,

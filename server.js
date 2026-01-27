@@ -823,3 +823,280 @@ async function start() {
 }
 
 start();
+// ============ PRODUCT SELECTIONS ROUTES ============
+
+// Add product selection
+app.post('/selections', ensureAuth, async (req, res) => {
+  const { product_id, quantity } = req.body;
+  const selectionId = uuidv4();
+  
+  try {
+    const fs = require('fs');
+    const initSqlJs = require('sql.js');
+    const dbPath = path.join(__dirname, 'data', 'aco.db');
+    
+    if (fs.existsSync(dbPath)) {
+      const SQL = await initSqlJs();
+      const fileBuffer = fs.readFileSync(dbPath);
+      const db = new SQL.Database(fileBuffer);
+      
+      // Check if already selected
+      const existing = db.exec(`SELECT * FROM product_selections WHERE user_id = '${req.user.id}' AND product_id = '${product_id}'`);
+      if (existing.length > 0 && existing[0].values.length > 0) {
+        // Update existing
+        db.run(`UPDATE product_selections SET quantity = '${quantity}' WHERE user_id = '${req.user.id}' AND product_id = '${product_id}'`);
+      } else {
+        // Insert new
+        db.run('INSERT INTO product_selections (id, user_id, product_id, quantity) VALUES (?, ?, ?, ?)',
+          [selectionId, req.user.id, product_id, quantity]);
+      }
+      
+      const data = db.export();
+      fs.writeFileSync(dbPath, Buffer.from(data));
+    }
+    
+    req.flash('success_msg', 'Product added to your selections!');
+  } catch (e) {
+    console.error('Selection error:', e);
+    req.flash('error_msg', 'Error adding product selection');
+  }
+  
+  res.redirect('/dashboard');
+});
+
+// Remove product selection
+app.delete('/selections/:id', ensureAuth, async (req, res) => {
+  try {
+    const fs = require('fs');
+    const initSqlJs = require('sql.js');
+    const dbPath = path.join(__dirname, 'data', 'aco.db');
+    
+    if (fs.existsSync(dbPath)) {
+      const SQL = await initSqlJs();
+      const fileBuffer = fs.readFileSync(dbPath);
+      const db = new SQL.Database(fileBuffer);
+      
+      db.run(`DELETE FROM product_selections WHERE id = '${req.params.id}' AND user_id = '${req.user.id}'`);
+      
+      const data = db.export();
+      fs.writeFileSync(dbPath, Buffer.from(data));
+    }
+    
+    res.json({ success: true });
+  } catch (e) {
+    console.error('Delete selection error:', e);
+    res.json({ success: false });
+  }
+});
+
+// My Selections page
+app.get('/my-selections', ensureAuth, async (req, res) => {
+  try {
+    const fs = require('fs');
+    const initSqlJs = require('sql.js');
+    const dbPath = path.join(__dirname, 'data', 'aco.db');
+    
+    if (!fs.existsSync(dbPath)) {
+      return res.render('products', { products: [], selections: [], selectedCategory: null, user: req.user });
+    }
+    
+    const SQL = await initSqlJs();
+    const fileBuffer = fs.readFileSync(dbPath);
+    const db = new SQL.Database(fileBuffer);
+    
+    const result = db.exec(`
+      SELECT ps.*, p.name as product_name, p.sku, p.category, p.description, p.tcin
+      FROM product_selections ps
+      JOIN products p ON ps.product_id = p.id
+      WHERE ps.user_id = '${req.user.id}'
+      ORDER BY ps.created_at DESC
+    `);
+    
+    const selections = result.length > 0 ? result[0].values.map(row => {
+      const obj = {};
+      result[0].columns.forEach((col, i) => obj[col] = row[i]);
+      return obj;
+    }) : [];
+    
+    res.render('my-selections', { selections, user: req.user });
+  } catch (e) {
+    console.error('My selections error:', e);
+    res.render('my-selections', { selections: [], user: req.user });
+  }
+});
+
+// ============ MY CHECKOUTS ROUTES ============
+
+// My Checkouts page
+app.get('/my-checkouts', ensureAuth, async (req, res) => {
+  try {
+    const fs = require('fs');
+    const initSqlJs = require('sql.js');
+    const dbPath = path.join(__dirname, 'data', 'aco.db');
+    
+    if (!fs.existsSync(dbPath)) {
+      return res.render('my-checkouts', { checkouts: [], user: req.user });
+    }
+    
+    const SQL = await initSqlJs();
+    const fileBuffer = fs.readFileSync(dbPath);
+    const db = new SQL.Database(fileBuffer);
+    
+    const result = db.exec(`SELECT * FROM checkouts WHERE user_id = '${req.user.id}' ORDER BY created_at DESC`);
+    const checkouts = result.length > 0 ? result[0].values.map(row => {
+      const obj = {};
+      result[0].columns.forEach((col, i) => obj[col] = row[i]);
+      return obj;
+    }) : [];
+    
+    res.render('my-checkouts', { checkouts, user: req.user });
+  } catch (e) {
+    console.error('My checkouts error:', e);
+    res.render('my-checkouts', { checkouts: [], user: req.user });
+  }
+});
+
+// ============ WEBHOOK ROUTES ============
+
+// Checkout webhook from Discord bot
+app.post('/webhooks/checkout', async (req, res) => {
+  try {
+    const { user_id, username, product_name, sku, quantity, status, price, timestamp } = req.body;
+    
+    if (!user_id || !product_name) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    const fs = require('fs');
+    const initSqlJs = require('sql.js');
+    const dbPath = path.join(__dirname, 'data', 'aco.db');
+    
+    if (fs.existsSync(dbPath)) {
+      const SQL = await initSqlJs();
+      const fileBuffer = fs.readFileSync(dbPath);
+      const db = new SQL.Database(fileBuffer);
+      
+      const checkoutId = uuidv4();
+      db.run(
+        'INSERT INTO checkouts (id, user_id, product_name, sku, quantity, status, price, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [checkoutId, user_id, product_name, sku || null, quantity || 1, status || 'success', price || null, timestamp || new Date().toISOString()]
+      );
+      
+      const data = db.export();
+      fs.writeFileSync(dbPath, Buffer.from(data));
+    }
+    
+    res.json({ success: true });
+  } catch (e) {
+    console.error('Webhook error:', e);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ============ ADMIN: VIEW MEMBER SELECTIONS ============
+
+app.get('/admin/selections', ensureAdmin, async (req, res) => {
+  try {
+    const fs = require('fs');
+    const initSqlJs = require('sql.js');
+    const dbPath = path.join(__dirname, 'data', 'aco.db');
+    
+    if (!fs.existsSync(dbPath)) {
+      return res.render('admin/selections', { selections: [], user: req.user });
+    }
+    
+    const SQL = await initSqlJs();
+    const fileBuffer = fs.readFileSync(dbPath);
+    const db = new SQL.Database(fileBuffer);
+    
+    const result = db.exec(`
+      SELECT ps.*, p.name as product_name, p.sku, p.category, u.username
+      FROM product_selections ps
+      JOIN products p ON ps.product_id = p.id
+      JOIN users u ON ps.user_id = u.id
+      ORDER BY ps.created_at DESC
+    `);
+    
+    const selections = result.length > 0 ? result[0].values.map(row => {
+      const obj = {};
+      result[0].columns.forEach((col, i) => obj[col] = row[i]);
+      return obj;
+    }) : [];
+    
+    res.render('admin/selections', { selections, user: req.user });
+  } catch (e) {
+    console.error('Admin selections error:', e);
+    res.render('admin/selections', { selections: [], user: req.user });
+  }
+});
+
+// Update dashboard to include selections
+const originalDashboard = app._router.stack.find(r => r.route && r.route.path === '/dashboard' && r.route.methods.get);
+if (originalDashboard) {
+  const dashboardPath = originalDashboard.route.path;
+  const dashboardHandler = originalDashboard.route.stack[0].handle;
+  
+  app.get(dashboardPath, ensureAuth, async (req, res) => {
+    try {
+      const fs = require('fs');
+      const initSqlJs = require('sql.js');
+      const dbPath = path.join(__dirname, 'data', 'aco.db');
+      
+      if (!fs.existsSync(dbPath)) {
+        return dashboardHandler(req, res);
+      }
+      
+      const SQL = await initSqlJs();
+      const fileBuffer = fs.readFileSync(dbPath);
+      const db = new SQL.Database(fileBuffer);
+      
+      const productsResult = db.exec('SELECT * FROM products ORDER BY category, name');
+      const products = productsResult.length > 0 ? productsResult[0].values.map(row => {
+        const obj = {};
+        productsResult[0].columns.forEach((col, i) => obj[col] = row[i]);
+        return obj;
+      }) : [];
+      
+      const checkoutsResult = db.exec(`SELECT * FROM checkouts WHERE user_id = '${req.user.id}' ORDER BY created_at DESC LIMIT 10`);
+      const checkouts = checkoutsResult.length > 0 ? checkoutsResult[0].values.map(row => {
+        const obj = {};
+        checkoutsResult[0].columns.forEach((col, i) => obj[col] = row[i]);
+        return obj;
+      }) : [];
+      
+      const releasesResult = db.exec('SELECT * FROM releases WHERE release_date >= date("now") ORDER BY release_date ASC');
+      const releases = releasesResult.length > 0 ? releasesResult[0].values.map(row => {
+        const obj = {};
+        releasesResult[0].columns.forEach((col, i) => obj[col] = row[i]);
+        return obj;
+      }) : [];
+      
+      const selectionsResult = db.exec(`SELECT * FROM product_selections WHERE user_id = '${req.user.id}'`);
+      const selections = selectionsResult.length > 0 ? selectionsResult[0].values.map(row => {
+        const obj = {};
+        selectionsResult[0].columns.forEach((col, i) => obj[col] = row[i]);
+        return obj;
+      }) : [];
+      
+      // Get product names for selections
+      if (selections.length > 0) {
+        const productIds = selections.map(s => `'${s.product_id}'`).join(',');
+        const productNames = db.exec(`SELECT id, name FROM products WHERE id IN (${productIds})`);
+        if (productNames.length > 0) {
+          const nameMap = {};
+          productNames[0].values.forEach(row => {
+            nameMap[row[0]] = row[1];
+          });
+          selections.forEach(s => {
+            s.product_name = nameMap[s.product_id] || 'Unknown';
+          });
+        }
+      }
+      
+      res.render('dashboard', { products, checkouts, releases, selections, user: req.user });
+    } catch (e) {
+      console.error('Dashboard error:', e);
+      res.render('dashboard', { products: [], checkouts: [], releases: [], selections: [], user: req.user });
+    }
+  });
+}
