@@ -574,6 +574,58 @@ app.delete('/admin/products/:id', ensureAdmin, async (req, res) => {
   }
 });
 
+// Admin - Seed products (for initial setup)
+app.post('/admin/seed-products', ensureAdmin, async (req, res) => {
+  try {
+    const { getDbWithSQL } = require('./models/database');
+    const { db, SQL } = await getDbWithSQL();
+    const { v4: uuidv4 } = require('uuid');
+    
+    const products = [
+      { name: 'Pokemon TCG Scarlet & Violet - Base Set Booster Box', sku: 'placeholder-sv-base', category: 'Pokemon - Target', description: '36 packs per box', active: 1 },
+      { name: 'Pokemon TCG Scarlet & Violet - Paradox Rift Booster Box', sku: 'placeholder-sv-paradox', category: 'Pokemon - Target', description: '36 packs per box', active: 1 },
+      { name: 'Pokemon TCG Scarlet & Violet - Obsidian Flames Booster Box', sku: 'placeholder-sv-obsidian', category: 'Pokemon - Target', description: '36 packs per box', active: 1 },
+      { name: 'Pokemon TCG Scarlet & Violet - Paldean Fates Booster Box', sku: 'placeholder-sv-paldean', category: 'Pokemon - Target', description: '36 packs per box', active: 1 },
+      { name: 'Pokemon TCG Elite Trainer Box - Scarlet & Violet', sku: 'placeholder-etb-sv', category: 'Pokemon - Target', description: 'Elite Trainer Box', active: 1 },
+      { name: 'Pokemon TCG - Pokemon Center Elite Trainer Box', sku: 'placeholder-etb-pc', category: 'Pokemon - Target', description: 'Exclusive Pokemon Center ETB', active: 1 },
+      { name: 'Panini Prizm Football Hobby Box', sku: 'placeholder-prizm-football', category: 'Sports Cards', description: '12 packs per box', active: 1 },
+      { name: 'Panini Prizm Basketball Hobby Box', sku: 'placeholder-prizm-basketball', category: 'Sports Cards', description: '12 packs per box', active: 1 },
+      { name: 'Panini Select Football Hobby Box', sku: 'placeholder-select-football', category: 'Sports Cards', description: '18 packs per box', active: 1 },
+      { name: 'Panini Select Basketball Hobby Box', sku: 'placeholder-select-basketball', category: 'Sports Cards', description: '18 packs per box', active: 1 },
+      { name: 'Panini Mosaic Football Hobby Box', sku: 'placeholder-mosaic-football', category: 'Sports Cards', description: '14 packs per box', active: 1 },
+      { name: 'Panini Mosaic Basketball Hobby Box', sku: 'placeholder-mosaic-basketball', category: 'Sports Cards', description: '14 packs per box', active: 1 },
+      { name: 'Topps Chrome Baseball Hobby Box', sku: 'placeholder-chrome-baseball', category: 'Sports Cards', description: '24 packs per box', active: 1 },
+      { name: 'Panini Prizm Baseball Hobby Box', sku: 'placeholder-prizm-baseball', category: 'Sports Cards', description: '12 packs per box', active: 1 },
+      { name: 'One Piece Card Game - Romance Dawn Booster Box', sku: 'placeholder-op-romance', category: 'One Piece', description: '36 packs per box', active: 1 },
+      { name: 'One Piece Card Game - Paramount War Booster Box', sku: 'placeholder-op-paramount', category: 'One Piece', description: '36 packs per box', active: 1 },
+      { name: 'One Piece Card Game - Pillars of Strength Booster Box', sku: 'placeholder-op-pillars', category: 'One Piece', description: '36 packs per box', active: 1 },
+      { name: 'One Piece Card Game - Kingdoms of Intrigue Booster Box', sku: 'placeholder-op-kingdoms', category: 'One Piece', description: '36 packs per box', active: 1 },
+      { name: 'One Piece Card Game - Wings of the Captain Booster Box', sku: 'placeholder-op-wings', category: 'One Piece', description: '36 packs per box', active: 1 },
+      { name: 'One Piece Card Game - 500 Years Quest Booster Box', sku: 'placeholder-op-500years', category: 'One Piece', description: '36 packs per box', active: 1 },
+      { name: 'One Piece Card Game - Starter Deck', sku: 'placeholder-op-starter', category: 'One Piece', description: 'Pre-constructed starter deck', active: 1 },
+      { name: 'One Piece Card Game - Booster Box Case', sku: 'placeholder-op-case', category: 'One Piece', description: 'Full case (6 boxes)', active: 1 }
+    ];
+    
+    for (const product of products) {
+      try {
+        db.run(
+          'INSERT INTO products (id, name, sku, category, description, active) VALUES (?, ?, ?, ?, ?, ?)',
+          [uuidv4(), product.name, product.sku, product.category, product.description, product.active]
+        );
+      } catch (e) {
+        // Product might already exist, ignore
+      }
+    }
+    
+    req.flash('success_msg', 'Products seeded successfully!');
+  } catch (e) {
+    console.error('Seed error:', e);
+    req.flash('error_msg', 'Error seeding products');
+  }
+  
+  res.redirect('/admin/products');
+});
+
 // Admin - Manage releases
 app.get('/admin/releases', ensureAdmin, async (req, res) => {
   try {

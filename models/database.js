@@ -11,15 +11,29 @@ if (!fs.existsSync(dataDir)) {
 
 let db = null;
 let SQL = null;
+let sqlLoading = null;
+
+// Get or load SQL.js (cached)
+async function getSQL() {
+  if (SQL) return SQL;
+  if (sqlLoading) return sqlLoading;
+  
+  sqlLoading = initSqlJs().then(module => {
+    SQL = module;
+    return SQL;
+  });
+  
+  return sqlLoading;
+}
 
 async function initDatabase() {
-  SQL = await initSqlJs();
+  const SQLModule = await getSQL();
   
   if (fs.existsSync(DB_PATH)) {
     const fileBuffer = fs.readFileSync(DB_PATH);
-    db = new SQL.Database(fileBuffer);
+    db = new SQLModule.Database(fileBuffer);
   } else {
-    db = new SQL.Database();
+    db = new SQLModule.Database();
   }
   
   db.run(
@@ -194,4 +208,9 @@ function getDb() {
   return db;
 }
 
-module.exports = { initDatabase, saveDatabase, getDb };
+async function getDbWithSQL() {
+  const SQLModule = await getSQL();
+  return { db, SQL: SQLModule };
+}
+
+module.exports = { initDatabase, saveDatabase, getDb, getDbWithSQL, getSQL };

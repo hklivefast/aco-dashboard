@@ -12,7 +12,7 @@
 <body>
   <nav class="navbar">
     <a href="/" class="navbar-brand">
-      <span>AC</span> LIVEFAST ACO
+      LIVEFAST ACO
     </a>
     
     <div class="navbar-nav">
@@ -36,7 +36,12 @@
   <main class="container">
     <div class="d-flex justify-between align-center mb-3" style="flex-wrap: wrap; gap: 1rem;">
       <h1 style="font-size: 1.5rem;">Manage Products</h1>
-      <button class="btn btn-primary" onclick="openProductModal()">+ Add Product</button>
+      <div style="display: flex; gap: 0.5rem;">
+        <form action="/admin/seed-products" method="POST" style="display: inline;">
+          <button type="submit" class="btn btn-secondary">Seed Default Products</button>
+        </form>
+        <button class="btn btn-primary" onclick="openProductModal()">+ Add Product</button>
+      </div>
     </div>
 
     <div class="card">
