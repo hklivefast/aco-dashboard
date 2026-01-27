@@ -1,43 +1,88 @@
-<div class="d-flex justify-between align-center mb-3" style="flex-wrap: wrap; gap: 1rem;">
-  <h1 style="font-size: 1.5rem;">📝 Release Signups</h1>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Release Signups - ACO Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <span>⚡</span> ACO Dashboard
+    </a>
+    
+    <div class="navbar-nav">
+      <a href="/dashboard">Dashboard</a>
+      <a href="/products">Products</a>
+      <a href="/releases">Releases</a>
+      <a href="/admin" class="active">Admin</a>
+      
+      <div class="user-info">
+        <% if (user.avatar) { %>
+        <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png" alt="<%= user.username %>">
+        <% } else { %>
+        <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="<%= user.username %>">
+        <% } %>
+        <span><%= user.username %></span>
+        <a href="/logout" class="btn btn-secondary btn-sm">Logout</a>
+      </div>
+    </div>
+  </nav>
 
-<div class="card">
-  <% if (signups.length > 0) { %>
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>User</th>
-          <th>Discord ID</th>
-          <th>Release</th>
-          <th>Form URL</th>
-          <th>Signed Up</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% signups.forEach(function(signup) { %>
-        <tr>
-          <td><%= signup.username %></td>
-          <td><code><%= signup.user_discord_id %></code></td>
-          <td><%= signup.release_name %></td>
-          <td>
-            <% if (signup.form_url) { %>
-            <a href="<%= signup.form_url %>" target="_blank" class="btn btn-outline btn-sm">View</a>
-            <% } else { %>
-            <span style="color: var(--text-muted);">—</span>
-            <% } %>
-          </td>
-          <td><%= new Date(signup.created_at).toLocaleString() %></td>
-        </tr>
-        <% }); %>
-      </tbody>
-    </table>
-  </div>
-  <% } else { %>
-  <div class="empty-state">
-    <div class="empty-state-icon">📝</div>
-    <p>No signups yet.</p>
-  </div>
-  <% } %>
-</div>
+  <main class="container">
+    <div class="d-flex justify-between align-center mb-3" style="flex-wrap: wrap; gap: 1rem;">
+      <h1 style="font-size: 1.5rem;">📝 Release Signups</h1>
+    </div>
+
+    <div class="card">
+      <% if (signups.length > 0) { %>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Discord ID</th>
+              <th>Release</th>
+              <th>Form URL</th>
+              <th>Signed Up</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% signups.forEach(function(signup) { %>
+            <tr>
+              <td><%= signup.username %></td>
+              <td><code><%= signup.user_discord_id %></code></td>
+              <td><%= signup.release_name %></td>
+              <td>
+                <% if (signup.form_url) { %>
+                <a href="<%= signup.form_url %>" target="_blank" class="btn btn-outline btn-sm">View</a>
+                <% } else { %>
+                <span style="color: var(--text-muted);">—</span>
+                <% } %>
+              </td>
+              <td><%= new Date(signup.created_at).toLocaleString() %></td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+      <% } else { %>
+      <div class="empty-state">
+        <div class="empty-state-icon">📝</div>
+        <p>No signups yet.</p>
+      </div>
+      <% } %>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>⚡ ACO Dashboard — Automated Checkout Services</p>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

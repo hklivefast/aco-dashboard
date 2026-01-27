@@ -1,59 +1,107 @@
-<div class="card">
-  <div class="card-header">
-    <h2 class="card-title">📅 Upcoming Releases</h2>
-  </div>
-  
-  <% if (releases.length > 0) { %>
-    <% releases.forEach(function(release) { %>
-    <div class="release-card">
-      <div class="d-flex justify-between align-center mb-2" style="flex-wrap: wrap; gap: 0.5rem;">
-        <div>
-          <div class="release-date">📅 <%= new Date(release.release_date).toLocaleDateString() %></div>
-          <div class="release-name"><%= release.name %></div>
-        </div>
-        <% if (release.google_form_url) { %>
-        <a href="<%= release.google_form_url %>" target="_blank" class="btn btn-primary">Sign Up →</a>
-        <% } %>
-      </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Releases - ACO Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <span>⚡</span> ACO Dashboard
+    </a>
+    
+    <div class="navbar-nav">
+      <a href="/dashboard">Dashboard</a>
+      <a href="/products">Products</a>
+      <a href="/releases" class="active">Releases</a>
       
-      <% if (release.description) { %>
-      <p class="release-description"><%= release.description %></p>
+      <% if (user.isAdmin) { %>
+      <a href="/admin">Admin</a>
       <% } %>
       
-      <div class="mt-2">
-        <span class="badge badge-info">
-          <%= Math.ceil((new Date(release.release_date) - new Date()) / (1000 * 60 * 60 * 24)) %> days until release
-        </span>
+      <div class="user-info">
+        <% if (user.avatar) { %>
+        <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png" alt="<%= user.username %>">
+        <% } else { %>
+        <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="<%= user.username %>">
+        <% } %>
+        <span><%= user.username %></span>
+        <a href="/logout" class="btn btn-secondary btn-sm">Logout</a>
       </div>
     </div>
-    <% }); %>
-  <% } else { %>
-  <div class="empty-state">
-    <div class="empty-state-icon">📅</div>
-    <p>No upcoming releases scheduled.</p>
-  </div>
-  <% } %>
-</div>
+  </nav>
 
-<div class="card mt-2">
-  <div class="card-header">
-    <h3 class="card-title">✨ How It Works</h3>
-  </div>
-  <div class="grid grid-3">
-    <div style="text-align: center; padding: 1.5rem;">
-      <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">1️⃣</div>
-      <h4 style="margin-bottom: 0.5rem;">Check Releases</h4>
-      <p style="color: var(--text-secondary); font-size: 0.875rem;">Browse upcoming product releases and their dates</p>
+  <main class="container">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">📅 Upcoming Releases</h2>
+      </div>
+      
+      <% if (releases.length > 0) { %>
+        <% releases.forEach(function(release) { %>
+        <div class="release-card">
+          <div class="d-flex justify-between align-center mb-2" style="flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+              <div class="release-date">📅 <%= new Date(release.release_date).toLocaleDateString() %></div>
+              <div class="release-name"><%= release.name %></div>
+            </div>
+            <% if (release.google_form_url) { %>
+            <a href="<%= release.google_form_url %>" target="_blank" class="btn btn-primary">Sign Up →</a>
+            <% } %>
+          </div>
+          
+          <% if (release.description) { %>
+          <p class="release-description"><%= release.description %></p>
+          <% } %>
+          
+          <div class="mt-2">
+            <span class="badge badge-info">
+              <%= Math.ceil((new Date(release.release_date) - new Date()) / (1000 * 60 * 60 * 24)) %> days until release
+            </span>
+          </div>
+        </div>
+        <% }); %>
+      <% } else { %>
+      <div class="empty-state">
+        <div class="empty-state-icon">📅</div>
+        <p>No upcoming releases scheduled.</p>
+      </div>
+      <% } %>
     </div>
-    <div style="text-align: center; padding: 1.5rem;">
-      <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">2️⃣</div>
-      <h4 style="margin-bottom: 0.5rem;">Sign Up</h4>
-      <p style="color: var(--text-secondary); font-size: 0.875rem;">Click the sign up button to access the Google Form</p>
+
+    <div class="card mt-2">
+      <div class="card-header">
+        <h3 class="card-title">✨ How It Works</h3>
+      </div>
+      <div class="grid grid-3">
+        <div style="text-align: center; padding: 1.5rem;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">1️⃣</div>
+          <h4 style="margin-bottom: 0.5rem;">Check Releases</h4>
+          <p style="color: var(--text-secondary); font-size: 0.875rem;">Browse upcoming product releases and their dates</p>
+        </div>
+        <div style="text-align: center; padding: 1.5rem;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">2️⃣</div>
+          <h4 style="margin-bottom: 0.5rem;">Sign Up</h4>
+          <p style="color: var(--text-secondary); font-size: 0.875rem;">Click the sign up button to access the Google Form</p>
+        </div>
+        <div style="text-align: center; padding: 1.5rem;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">3️⃣</div>
+          <h4 style="margin-bottom: 0.5rem;">Get Notified</h4>
+          <p style="color: var(--text-secondary); font-size: 0.875rem;">Fill out the form to be notified when the release drops</p>
+        </div>
+      </div>
     </div>
-    <div style="text-align: center; padding: 1.5rem;">
-      <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">3️⃣</div>
-      <h4 style="margin-bottom: 0.5rem;">Get Notified</h4>
-      <p style="color: var(--text-secondary); font-size: 0.875rem;">Fill out the form to be notified when the release drops</p>
-    </div>
-  </div>
-</div>
+  </main>
+
+  <footer class="footer">
+    <p>⚡ ACO Dashboard — Automated Checkout Services</p>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
