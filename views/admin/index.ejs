@@ -1,44 +1,54 @@
-<div class="hero">
-  <h1>Admin Dashboard ⚙️</h1>
+<div class="hero" style="padding: 2rem;">
+  <h1 style="font-size: 2rem;">⚙️ Admin Dashboard</h1>
   <p>Manage your ACO Dashboard</p>
 </div>
 
 <div class="grid grid-4">
-  <div class="card stat-card">
+  <div class="stat-card">
     <div class="stat-value"><%= stats.totalUsers %></div>
-    <div class="stat-label">Total Users</div>
+    <div class="stat-label">👥 Users</div>
   </div>
-  <div class="card stat-card">
+  <div class="stat-card">
     <div class="stat-value"><%= stats.totalProducts %></div>
-    <div class="stat-label">Products</div>
+    <div class="stat-label">📦 Products</div>
   </div>
-  <div class="card stat-card">
+  <div class="stat-card">
     <div class="stat-value"><%= stats.totalCheckouts %></div>
-    <div class="stat-label">Checkouts</div>
+    <div class="stat-label">🛒 Checkouts</div>
   </div>
-  <div class="card stat-card">
+  <div class="stat-card">
     <div class="stat-value"><%= stats.totalReleases %></div>
-    <div class="stat-label">Releases</div>
+    <div class="stat-label">📅 Releases</div>
   </div>
 </div>
 
-<div class="grid grid-2">
+<div class="grid grid-2 mt-3">
   <div class="card">
     <div class="card-header">
-      <h2 class="card-title">Quick Links</h2>
+      <h2 class="card-title">🚀 Quick Links</h2>
     </div>
-    <div class="d-flex flex-column gap-1">
-      <a href="/admin/products" class="btn btn-outline">Manage Products</a>
-      <a href="/admin/releases" class="btn btn-outline">Manage Releases</a>
-      <a href="/admin/signups" class="btn btn-outline">View Signups</a>
-      <a href="/admin/checkouts" class="btn btn-outline">All Checkouts</a>
-      <a href="/admin/members" class="btn btn-outline">Member List</a>
+    <div class="d-flex flex-column gap-2">
+      <a href="/admin/products" class="btn btn-secondary" style="justify-content: flex-start;">
+        <span>📦</span> Manage Products
+      </a>
+      <a href="/admin/releases" class="btn btn-secondary" style="justify-content: flex-start;">
+        <span>📅</span> Manage Releases
+      </a>
+      <a href="/admin/signups" class="btn btn-secondary" style="justify-content: flex-start;">
+        <span>📝</span> View Signups
+      </a>
+      <a href="/admin/checkouts" class="btn btn-secondary" style="justify-content: flex-start;">
+        <span>🛒</span> All Checkouts
+      </a>
+      <a href="/admin/members" class="btn btn-secondary" style="justify-content: flex-start;">
+        <span>👥</span> Member List
+      </a>
     </div>
   </div>
 
   <div class="card">
     <div class="card-header">
-      <h2 class="card-title">Recent Signups</h2>
+      <h2 class="card-title">🕐 Recent Signups</h2>
     </div>
     
     <% if (stats.recentSignups && stats.recentSignups.length > 0) { %>
@@ -64,6 +74,7 @@
     </div>
     <% } else { %>
     <div class="empty-state">
+      <div class="empty-state-icon">📝</div>
       <p>No recent signups</p>
     </div>
     <% } %>

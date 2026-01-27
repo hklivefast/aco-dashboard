@@ -1,5 +1,5 @@
-<div class="d-flex justify-between align-center mb-3">
-  <h1>Release Signups</h1>
+<div class="d-flex justify-between align-center mb-3" style="flex-wrap: wrap; gap: 1rem;">
+  <h1 style="font-size: 1.5rem;">📝 Release Signups</h1>
 </div>
 
 <div class="card">
@@ -25,7 +25,7 @@
             <% if (signup.form_url) { %>
             <a href="<%= signup.form_url %>" target="_blank" class="btn btn-outline btn-sm">View</a>
             <% } else { %>
-            <span style="color: var(--gray);">-</span>
+            <span style="color: var(--text-muted);">—</span>
             <% } %>
           </td>
           <td><%= new Date(signup.created_at).toLocaleString() %></td>
@@ -36,7 +36,7 @@
   </div>
   <% } else { %>
   <div class="empty-state">
-    <p class="empty-state-icon">📝</p>
+    <div class="empty-state-icon">📝</div>
     <p>No signups yet.</p>
   </div>
   <% } %>

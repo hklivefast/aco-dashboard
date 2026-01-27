@@ -1,5 +1,5 @@
-<div class="d-flex justify-between align-center mb-3">
-  <h1>Members</h1>
+<div class="d-flex justify-between align-center mb-3" style="flex-wrap: wrap; gap: 1rem;">
+  <h1 style="font-size: 1.5rem;">👥 Members</h1>
 </div>
 
 <div class="card">
@@ -21,12 +21,12 @@
         <tr>
           <td>
             <% if (member.avatar) { %>
-            <img src="https://cdn.discordapp.com/avatars/<%= member.id %>/<%= member.avatar %>.png" alt="<%= member.username %>" style="width: 32px; height: 32px; border-radius: 50%;">
+            <img src="https://cdn.discordapp.com/avatars/<%= member.id %>/<%= member.avatar %>.png" alt="<%= member.username %>" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--accent-primary);">
             <% } else { %>
-            <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="<%= member.username %>" style="width: 32px; height: 32px; border-radius: 50%;">
+            <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="<%= member.username %>" style="width: 40px; height: 40px; border-radius: 50%;">
             <% } %>
           </td>
-          <td><%= member.username %></td>
+          <td><strong><%= member.username %></strong></td>
           <td><code><%= member.id %></code></td>
           <td>
             <% if (member.is_admin) { %>
@@ -54,7 +54,7 @@
   </div>
   <% } else { %>
   <div class="empty-state">
-    <p class="empty-state-icon">👥</p>
+    <div class="empty-state-icon">👥</div>
     <p>No members yet.</p>
   </div>
   <% } %>

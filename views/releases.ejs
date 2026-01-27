@@ -1,18 +1,18 @@
 <div class="card">
   <div class="card-header">
-    <h2 class="card-title">Upcoming Releases</h2>
+    <h2 class="card-title">📅 Upcoming Releases</h2>
   </div>
   
   <% if (releases.length > 0) { %>
     <% releases.forEach(function(release) { %>
     <div class="release-card">
-      <div class="d-flex justify-between align-center mb-2">
+      <div class="d-flex justify-between align-center mb-2" style="flex-wrap: wrap; gap: 0.5rem;">
         <div>
           <div class="release-date">📅 <%= new Date(release.release_date).toLocaleDateString() %></div>
           <div class="release-name"><%= release.name %></div>
         </div>
         <% if (release.google_form_url) { %>
-        <a href="<%= release.google_form_url %>" target="_blank" class="btn btn-primary">Sign Up</a>
+        <a href="<%= release.google_form_url %>" target="_blank" class="btn btn-primary">Sign Up →</a>
         <% } %>
       </div>
       
@@ -29,7 +29,7 @@
     <% }); %>
   <% } else { %>
   <div class="empty-state">
-    <p class="empty-state-icon">📅</p>
+    <div class="empty-state-icon">📅</div>
     <p>No upcoming releases scheduled.</p>
   </div>
   <% } %>
@@ -37,23 +37,23 @@
 
 <div class="card mt-2">
   <div class="card-header">
-    <h3 class="card-title">How It Works</h3>
+    <h3 class="card-title">✨ How It Works</h3>
   </div>
   <div class="grid grid-3">
-    <div style="text-align: center;">
-      <div style="font-size: 2rem; margin-bottom: 0.5rem;">1️⃣</div>
-      <h4>Check Releases</h4>
-      <p style="color: var(--gray); font-size: 0.875rem;">Browse upcoming product releases and their dates</p>
+    <div style="text-align: center; padding: 1.5rem;">
+      <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">1️⃣</div>
+      <h4 style="margin-bottom: 0.5rem;">Check Releases</h4>
+      <p style="color: var(--text-secondary); font-size: 0.875rem;">Browse upcoming product releases and their dates</p>
     </div>
-    <div style="text-align: center;">
-      <div style="font-size: 2rem; margin-bottom: 0.5rem;">2️⃣</div>
-      <h4>Sign Up</h4>
-      <p style="color: var(--gray); font-size: 0.875rem;">Click the sign up button to access the Google Form</p>
+    <div style="text-align: center; padding: 1.5rem;">
+      <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">2️⃣</div>
+      <h4 style="margin-bottom: 0.5rem;">Sign Up</h4>
+      <p style="color: var(--text-secondary); font-size: 0.875rem;">Click the sign up button to access the Google Form</p>
     </div>
-    <div style="text-align: center;">
-      <div style="font-size: 2rem; margin-bottom: 0.5rem;">3️⃣</div>
-      <h4>Get Notified</h4>
-      <p style="color: var(--gray); font-size: 0.875rem;">Fill out the form to be notified when the release drops</p>
+    <div style="text-align: center; padding: 1.5rem;">
+      <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">3️⃣</div>
+      <h4 style="margin-bottom: 0.5rem;">Get Notified</h4>
+      <p style="color: var(--text-secondary); font-size: 0.875rem;">Fill out the form to be notified when the release drops</p>
     </div>
   </div>
 </div>
