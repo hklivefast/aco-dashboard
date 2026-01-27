@@ -900,41 +900,62 @@ app.use((err, req, res, next) => {
 
 // Add product selection
 app.post('/selections', ensureAuth, async (req, res) => {
+  console.log('POST /selections called', req.body);
   const { product_id, quantity } = req.body;
-  const selectionId = uuidv4();
   
-  // Handle "No Limit" - convert to null for database
-  const qtyValue = (quantity === 'No Limit' || !quantity) ? null : quantity;
+  if (!product_id) {
+    console.log('No product_id provided');
+    req.flash('error_msg', 'Please select a product');
+    return res.redirect('/products');
+  }
+  
+  const selectionId = uuidv4();
+  const qtyValue = (quantity === 'No Limit' || !quantity || quantity === 'null') ? null : quantity;
   
   try {
     const fs = require('fs');
     const initSqlJs = require('sql.js');
     const dbPath = path.join(__dirname, 'data', 'aco.db');
     
+    console.log('Database path:', dbPath, 'Exists:', fs.existsSync(dbPath));
+    
     if (fs.existsSync(dbPath)) {
       const SQL = await initSqlJs();
       const fileBuffer = fs.readFileSync(dbPath);
       const db = new SQL.Database(fileBuffer);
       
+      // Check if table exists
+      const tables = db.exec("SELECT name FROM sqlite_master WHERE type='table'");
+      const tableNames = tables.length > 0 ? tables[0].values.flat() : [];
+      console.log('Tables:', tableNames);
+      
+      if (!tableNames.includes('product_selections')) {
+        console.log('Creating product_selections table...');
+        db.run("CREATE TABLE product_selections (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, product_id TEXT NOT NULL, quantity TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
+      }
+      
       // Check if already selected
       const existing = db.exec(`SELECT * FROM product_selections WHERE user_id = '${req.user.id}' AND product_id = '${product_id}'`);
+      console.log('Existing selection:', existing.length > 0 ? existing[0].values : 'none');
+      
       if (existing.length > 0 && existing[0].values.length > 0) {
-        // Update existing
         db.run(`UPDATE product_selections SET quantity = ? WHERE user_id = '${req.user.id}' AND product_id = '${product_id}'`, [qtyValue]);
+        console.log('Updated existing selection');
       } else {
-        // Insert new
         db.run('INSERT INTO product_selections (id, user_id, product_id, quantity) VALUES (?, ?, ?, ?)',
           [selectionId, req.user.id, product_id, qtyValue]);
+        console.log('Inserted new selection');
       }
       
       const data = db.export();
       fs.writeFileSync(dbPath, Buffer.from(data));
+      console.log('Database saved');
     }
     
     req.flash('success_msg', 'Product added to your selections!');
   } catch (e) {
     console.error('Selection error:', e);
-    req.flash('error_msg', 'Error adding product selection');
+    req.flash('error_msg', 'Error adding product selection: ' + e.message);
   }
   
   res.redirect('/products');
