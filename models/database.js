@@ -84,8 +84,10 @@ async function initDatabase() {
   );
   
   // Migration: Create product_selections table if it doesn't exist
-  // Using try-catch because CREATE TABLE IF NOT EXISTS may not work on existing DBs
-  try {
+  const tables = db.exec("SELECT name FROM sqlite_master WHERE type='table'");
+  const tableNames = tables.length > 0 ? tables[0].values.flat() : [];
+  
+  if (!tableNames.includes('product_selections')) {
     db.run(
       "CREATE TABLE product_selections (" +
       "id TEXT PRIMARY KEY, " +
@@ -94,8 +96,7 @@ async function initDatabase() {
       "quantity TEXT, " +
       "created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"
     );
-  } catch (e) {
-    // Table already exists, ignore error
+    console.log('Created product_selections table');
   }
   
   const productCount = db.exec('SELECT COUNT(*) as count FROM products');
