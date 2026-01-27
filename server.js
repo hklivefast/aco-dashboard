@@ -910,37 +910,57 @@ app.post('/selections', ensureAuth, async (req, res) => {
   const selectionId = uuidv4();
   const qtyValue = (quantity === 'No Limit' || !quantity || quantity === 'null') ? null : quantity;
   
+  // Set a timeout to prevent hanging
+  const timeoutMs = 5000;
+  const timeout = setTimeout(() => {
+    console.error('Selection route timeout after', timeoutMs, 'ms');
+    req.flash('error_msg', 'Request timed out. Please try again.');
+    res.redirect('/products');
+  }, timeoutMs);
+  
   try {
-    const { getDb } = require('./models/database');
-    const db = getDb();
+    const fs = require('fs');
+    const dbPath = path.join(__dirname, 'data', 'aco.db');
     
-    if (db) {
-      // Check if table exists
-      const tables = db.exec("SELECT name FROM sqlite_master WHERE type='table'");
-      const tableNames = tables.length > 0 ? tables[0].values.flat() : [];
-      
-      if (!tableNames.includes('product_selections')) {
-        db.run("CREATE TABLE product_selections (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, product_id TEXT NOT NULL, quantity TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
-      }
-      
-      // Check if already selected
-      const existing = db.exec(`SELECT * FROM product_selections WHERE user_id = '${req.user.id}' AND product_id = '${product_id}'`);
-      
-      if (existing.length > 0 && existing[0].values.length > 0) {
-        db.run(`UPDATE product_selections SET quantity = ? WHERE user_id = '${req.user.id}' AND product_id = '${product_id}'`, [qtyValue]);
-      } else {
-        db.run('INSERT INTO product_selections (id, user_id, product_id, quantity) VALUES (?, ?, ?, ?)',
-          [selectionId, req.user.id, product_id, qtyValue]);
-      }
-      
-      const { saveDatabase } = require('./models/database');
-      saveDatabase();
+    if (!fs.existsSync(dbPath)) {
+      clearTimeout(timeout);
+      req.flash('error_msg', 'Database not found');
+      return res.redirect('/products');
     }
     
+    const initSqlJs = require('sql.js');
+    const SQL = await initSqlJs();
+    const fileBuffer = fs.readFileSync(dbPath);
+    const db = new SQL.Database(fileBuffer);
+    
+    // Check if table exists
+    const tables = db.exec("SELECT name FROM sqlite_master WHERE type='table'");
+    const tableNames = tables.length > 0 ? tables[0].values.flat() : [];
+    
+    if (!tableNames.includes('product_selections')) {
+      db.run("CREATE TABLE product_selections (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, product_id TEXT NOT NULL, quantity TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
+    }
+    
+    // Check if already selected
+    const existing = db.exec(`SELECT * FROM product_selections WHERE user_id = '${req.user.id}' AND product_id = '${product_id}'`);
+    
+    if (existing.length > 0 && existing[0].values.length > 0) {
+      db.run(`UPDATE product_selections SET quantity = ? WHERE user_id = '${req.user.id}' AND product_id = '${product_id}'`, [qtyValue]);
+    } else {
+      db.run('INSERT INTO product_selections (id, user_id, product_id, quantity) VALUES (?, ?, ?, ?)',
+        [selectionId, req.user.id, product_id, qtyValue]);
+    }
+    
+    // Save database
+    const data = db.export();
+    fs.writeFileSync(dbPath, Buffer.from(data));
+    
+    clearTimeout(timeout);
     req.flash('success_msg', 'Product added to your selections!');
   } catch (e) {
+    clearTimeout(timeout);
     console.error('Selection error:', e);
-    req.flash('error_msg', 'Error adding product selection');
+    req.flash('error_msg', 'Error adding product selection: ' + e.message);
   }
   
   res.redirect('/products');
