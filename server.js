@@ -18,6 +18,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+// Method override for forms
+app.use((req, res, next) => {
+  if (req.body && req.body._method) {
+    req.method = req.body._method;
+    delete req.body._method;
+  }
+  next();
+});
+
 // Session configuration
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
@@ -57,13 +66,24 @@ app.use(flash());
 app.use(async (req, res, next) => {
   if (req.user && req.user.id) {
     try {
-      const db = require('./models/database');
-      // We need to import the db after initialization
-      const dbModule = require('./models/database');
-      // The isAdmin will be set after login
-      req.user.isAdmin = req.user.isAdmin || 0;
+      const dbPath = path.join(__dirname, 'data', 'aco.db');
+      if (fs.existsSync(dbPath)) {
+        const SQL = await initSqlJs();
+        const fileBuffer = fs.readFileSync(dbPath);
+        const db = new SQL.Database(fileBuffer);
+        
+        const result = db.exec(`SELECT is_admin FROM users WHERE id = '${req.user.id}'`);
+        if (result.length > 0 && result[0].values.length > 0) {
+          req.user.isAdmin = result[0].values[0][0] === 1 ? 1 : 0;
+        } else {
+          req.user.isAdmin = 0;
+        }
+      } else {
+        req.user.isAdmin = 0;
+      }
     } catch (e) {
       console.error('Error checking admin status:', e);
+      req.user.isAdmin = 0;
     }
   }
   res.locals.user = req.user || null;
@@ -74,10 +94,19 @@ app.use(async (req, res, next) => {
 });
 
 // Helper to check if user is admin
-function isUserAdmin(userId) {
+async function isUserAdmin(userId) {
   try {
-    const db = require('./models/database');
-    // This will be populated after init
+    const dbPath = path.join(__dirname, 'data', 'aco.db');
+    if (fs.existsSync(dbPath)) {
+      const SQL = await initSqlJs();
+      const fileBuffer = fs.readFileSync(dbPath);
+      const db = new SQL.Database(fileBuffer);
+      
+      const result = db.exec(`SELECT is_admin FROM users WHERE id = '${userId}'`);
+      if (result.length > 0 && result[0].values.length > 0) {
+        return result[0].values[0][0] === 1;
+      }
+    }
     return false;
   } catch (e) {
     return false;
@@ -95,16 +124,20 @@ function ensureAuth(req, res, next) {
 async function ensureAdmin(req, res, next) {
   if (req.isAuthenticated() && req.user.id) {
     try {
-      const db = require('./models/database');
-      // Simple check - any authenticated Discord user is admin for now
-      // You can enhance this by querying the database
-      req.user.isAdmin = 1; // Set all users as admin for now
-      return next();
+      const isAdmin = await isUserAdmin(req.user.id);
+      if (isAdmin) {
+        req.user.isAdmin = 1;
+        return next();
+      } else {
+        req.flash('error_msg', 'You do not have admin access.');
+        return res.redirect('/dashboard');
+      }
     } catch (e) {
-      return next();
+      console.error('Admin check error:', e);
+      return res.redirect('/dashboard');
     }
   }
-  res.redirect('/dashboard');
+  res.redirect('/login');
 }
 
 // ============ ROUTES ============
@@ -459,7 +492,7 @@ app.get('/admin/products', ensureAdmin, async (req, res) => {
 });
 
 app.post('/admin/products', ensureAdmin, async (req, res) => {
-  const { name, sku, category, description, active } = req.body;
+  const { name, sku, category, description, url, active } = req.body;
   const productId = uuidv4();
   
   try {
@@ -472,8 +505,8 @@ app.post('/admin/products', ensureAdmin, async (req, res) => {
       const fileBuffer = fs.readFileSync(dbPath);
       const db = new SQL.Database(fileBuffer);
       
-      db.run('INSERT INTO products (id, name, sku, category, description, active) VALUES (?, ?, ?, ?, ?, ?)',
-        [productId, name, sku, category, description, active ? 1 : 0]);
+      db.run('INSERT INTO products (id, name, sku, category, description, url, active) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [productId, name, sku, category, description, url || null, active ? 1 : 0]);
       
       const data = db.export();
       fs.writeFileSync(dbPath, Buffer.from(data));
@@ -489,7 +522,7 @@ app.post('/admin/products', ensureAdmin, async (req, res) => {
 });
 
 app.put('/admin/products/:id', ensureAdmin, async (req, res) => {
-  const { name, sku, category, description, active } = req.body;
+  const { name, sku, category, description, url, active } = req.body;
   
   try {
     const fs = require('fs');
@@ -501,7 +534,7 @@ app.put('/admin/products/:id', ensureAdmin, async (req, res) => {
       const fileBuffer = fs.readFileSync(dbPath);
       const db = new SQL.Database(fileBuffer);
       
-      db.run(`UPDATE products SET name = '${name.replace(/'/g, "''")}', sku = '${sku.replace(/'/g, "''")}', category = '${category.replace(/'/g, "''")}', description = '${(description || '').replace(/'/g, "''")}', active = ${active ? 1 : 0} WHERE id = '${req.params.id}'`);
+      db.run(`UPDATE products SET name = '${name.replace(/'/g, "''")}', sku = '${sku.replace(/'/g, "''")}', category = '${category.replace(/'/g, "''")}', description = '${(description || '').replace(/'/g, "''")}', url = '${(url || '').replace(/'/g, "''")}', active = ${active ? 1 : 0} WHERE id = '${req.params.id}'`);
       
       const data = db.export();
       fs.writeFileSync(dbPath, Buffer.from(data));
@@ -750,6 +783,12 @@ app.get('/admin/members', ensureAdmin, async (req, res) => {
 
 // Admin - Make admin
 app.post('/admin/members/:id/promote', ensureAdmin, async (req, res) => {
+  // Prevent self-demotion
+  if (req.params.id === req.user.id) {
+    req.flash('error_msg', 'You cannot demote yourself.');
+    return res.redirect('/admin/members');
+  }
+  
   try {
     const fs = require('fs');
     const initSqlJs = require('sql.js');
@@ -776,6 +815,12 @@ app.post('/admin/members/:id/promote', ensureAdmin, async (req, res) => {
 });
 
 app.post('/admin/members/:id/demote', ensureAdmin, async (req, res) => {
+  // Prevent self-demotion
+  if (req.params.id === req.user.id) {
+    req.flash('error_msg', 'You cannot demote yourself.');
+    return res.redirect('/admin/members');
+  }
+  
   try {
     const fs = require('fs');
     const initSqlJs = require('sql.js');
@@ -799,6 +844,42 @@ app.post('/admin/members/:id/demote', ensureAdmin, async (req, res) => {
   }
   
   res.redirect('/admin/members');
+});
+
+// Admin - Manage Admins dedicated page
+app.get('/admin/manage-admins', ensureAdmin, async (req, res) => {
+  try {
+    const fs = require('fs');
+    const initSqlJs = require('sql.js');
+    const dbPath = path.join(__dirname, 'data', 'aco.db');
+    
+    if (!fs.existsSync(dbPath)) {
+      return res.render('admin/manage-admins', { admins: [], nonAdmins: [], user: req.user });
+    }
+    
+    const SQL = await initSqlJs();
+    const fileBuffer = fs.readFileSync(dbPath);
+    const db = new SQL.Database(fileBuffer);
+    
+    const adminsResult = db.exec("SELECT * FROM users WHERE is_admin = 1 ORDER BY username");
+    const admins = adminsResult.length > 0 ? adminsResult[0].values.map(row => {
+      const obj = {};
+      adminsResult[0].columns.forEach((col, i) => obj[col] = row[i]);
+      return obj;
+    }) : [];
+    
+    const nonAdminsResult = db.exec("SELECT * FROM users WHERE is_admin = 0 ORDER BY username");
+    const nonAdmins = nonAdminsResult.length > 0 ? nonAdminsResult[0].values.map(row => {
+      const obj = {};
+      nonAdminsResult[0].columns.forEach((col, i) => obj[col] = row[i]);
+      return obj;
+    }) : [];
+    
+    res.render('admin/manage-admins', { admins, nonAdmins, user: req.user });
+  } catch (e) {
+    console.error('Manage admins error:', e);
+    res.render('admin/manage-admins', { admins: [], nonAdmins: [], user: req.user });
+  }
 });
 
 // Error handler

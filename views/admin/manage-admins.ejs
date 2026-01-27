@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Admins - LIVEFAST ACO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <span>AC</span> LIVEFAST ACO
+    </a>
+    
+    <div class="navbar-nav">
+      <a href="/dashboard">Dashboard</a>
+      <a href="/products">Products</a>
+      <a href="/releases">Releases</a>
+      <a href="/admin" class="active">Admin</a>
+      
+      <div class="user-info">
+        <% if (user.avatar) { %>
+        <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png" alt="<%= user.username %>">
+        <% } else { %>
+        <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="<%= user.username %>">
+        <% } %>
+        <span><%= user.username %></span>
+        <a href="/logout" class="btn btn-secondary btn-sm">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="d-flex justify-between align-center mb-3" style="flex-wrap: wrap; gap: 1rem;">
+      <h1 style="font-size: 1.5rem;">Manage Admins</h1>
+      <a href="/admin/members" class="btn btn-secondary">Back to Members</a>
+    </div>
+
+    <div class="grid grid-2 mt-3">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Current Admins</h2>
+          <span class="badge badge-warning"><%= admins.length %></span>
+        </div>
+        
+        <% if (admins.length > 0) { %>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% admins.forEach(function(admin) { %>
+              <tr>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <% if (admin.avatar) { %>
+                    <img src="https://cdn.discordapp.com/avatars/<%= admin.id %>/<%= admin.avatar %>.png" alt="<%= admin.username %>" style="width: 32px; height: 32px; border-radius: 50%;">
+                    <% } else { %>
+                    <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="<%= admin.username %>" style="width: 32px; height: 32px; border-radius: 50%;">
+                    <% } %>
+                    <strong><%= admin.username %></strong>
+                    <% if (admin.id === user.id) { %>
+                    <span class="badge badge-info">You</span>
+                    <% } %>
+                  </div>
+                </td>
+                <td><span class="badge badge-warning">Admin</span></td>
+                <td>
+                  <% if (admin.id !== user.id) { %>
+                  <form action="/admin/members/<%= admin.id %>/demote" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to remove admin access from <%= admin.username %>?');">Remove</button>
+                  </form>
+                  <% } else { %>
+                  <span style="color: var(--text-muted); font-size: 0.8125rem;">Cannot remove self</span>
+                  <% } %>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+        <% } else { %>
+        <div class="empty-state">
+          <div class="empty-state-icon">USERS</div>
+          <p>No admins found.</p>
+        </div>
+        <% } %>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Promote User to Admin</h2>
+        </div>
+        
+        <% if (nonAdmins.length > 0) { %>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% nonAdmins.forEach(function(member) { %>
+              <tr>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <% if (member.avatar) { %>
+                    <img src="https://cdn.discordapp.com/avatars/<%= member.id %>/<%= member.avatar %>.png" alt="<%= member.username %>" style="width: 32px; height: 32px; border-radius: 50%;">
+                    <% } else { %>
+                    <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="<%= member.username %>" style="width: 32px; height: 32px; border-radius: 50%;">
+                    <% } %>
+                    <strong><%= member.username %></strong>
+                  </div>
+                </td>
+                <td><span class="badge badge-info">Member</span></td>
+                <td>
+                  <form action="/admin/members/<%= member.id %>/promote" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-success btn-sm">Make Admin</button>
+                  </form>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+        <% } else { %>
+        <div class="empty-state">
+          <div class="empty-state-icon">USERS</div>
+          <p>No non-admin users to promote.</p>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>AC LIVEFAST ACO - Automated Checkout Services</p>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title || 'ACO Dashboard' %></title>
+  <title><%= title || 'LIVEFAST ACO' %></title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
 <body>
   <nav class="navbar">
     <a href="/" class="navbar-brand">
-      <span>⚡</span> ACO Dashboard
+      <span>AC</span> LIVEFAST ACO
     </a>
     
     <% if (user) { %>
@@ -41,19 +41,19 @@
   <main class="container">
     <% if (typeof success_msg !== 'undefined' && success_msg.length > 0) { %>
       <% success_msg.forEach(function(msg) { %>
-        <div class="alert alert-success">✓ <%= msg %></div>
+        <div class="alert alert-success"><%= msg %></div>
       <% }); %>
     <% } %>
     
     <% if (typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
       <% error_msg.forEach(function(msg) { %>
-        <div class="alert alert-danger">✕ <%= msg %></div>
+        <div class="alert alert-danger"><%= msg %></div>
       <% }); %>
     <% } %>
     
     <% if (typeof error !== 'undefined' && error.length > 0) { %>
       <% error.forEach(function(msg) { %>
-        <div class="alert alert-danger">✕ <%= msg %></div>
+        <div class="alert alert-danger"><%= msg %></div>
       <% }); %>
     <% } %>
     
@@ -62,12 +62,12 @@
 
   <% if (!user) { %>
   <footer class="footer">
-    <p>⚡ ACO Dashboard — Automated Checkout Services</p>
+    <p>AC LIVEFAST ACO - Automated Checkout Services</p>
     <p style="margin-top: 0.5rem; font-size: 0.8125rem;">Login with Discord to access the dashboard</p>
   </footer>
   <% } else { %>
   <footer class="footer">
-    <p>⚡ ACO Dashboard — Automated Checkout Services</p>
+    <p>AC LIVEFAST ACO - Automated Checkout Services</p>
   </footer>
   <% } %>
 

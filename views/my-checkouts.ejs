@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Checkouts - ACO Dashboard</title>
+  <title>My Checkouts - LIVEFAST ACO</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -12,12 +12,13 @@
 <body>
   <nav class="navbar">
     <a href="/" class="navbar-brand">
-      <span>⚡</span> ACO Dashboard
+      <span>AC</span> LIVEFAST ACO
     </a>
     
     <div class="navbar-nav">
       <a href="/dashboard">Dashboard</a>
       <a href="/products">Select Products</a>
+      <a href="/my-selections">My Selections</a>
       <a href="/releases">Releases</a>
       <a href="/my-checkouts" class="active">My Checkouts</a>
       
@@ -39,7 +40,7 @@
 
   <main class="container">
     <div class="hero" style="padding: 2rem;">
-      <h1 style="font-size: 2rem;">📦 My Checkouts</h1>
+      <h1 style="font-size: 2rem;">My Checkouts</h1>
       <p>Track your automated checkout results</p>
     </div>
 
@@ -74,7 +75,7 @@
         </div>
       <% } else { %>
       <div class="empty-state">
-        <div class="empty-state-icon">📦</div>
+        <div class="empty-state-icon">BOX</div>
         <p>No checkouts yet.</p>
         <p style="font-size: 0.875rem; margin-top: 0.5rem;">
           Checkouts will appear here when your Discord bot sends webhook notifications.
@@ -85,7 +86,7 @@
 
     <div class="card mt-3">
       <div class="card-header">
-        <h2 class="card-title">🔔 Webhook Integration</h2>
+        <h2 class="card-title">Webhook Integration</h2>
       </div>
       <div style="color: var(--text-secondary);">
         <p>To receive checkout notifications, configure your Discord bot to send webhooks to:</p>
@@ -98,7 +99,7 @@
   </main>
 
   <footer class="footer">
-    <p>⚡ ACO Dashboard — Automated Checkout Services</p>
+    <p>AC LIVEFAST ACO - Automated Checkout Services</p>
   </footer>
 
   <script src="/js/app.js"></script>

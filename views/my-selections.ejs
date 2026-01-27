@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Selections - LIVEFAST ACO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <span>AC</span> LIVEFAST ACO
+    </a>
+    
+    <div class="navbar-nav">
+      <a href="/dashboard">Dashboard</a>
+      <a href="/products">Products</a>
+      <a href="/releases">Releases</a>
+      <a href="/my-selections" class="active">My Selections</a>
+      <a href="/my-checkouts">My Checkouts</a>
+      
+      <% if (user.isAdmin) { %>
+      <a href="/admin">Admin</a>
+      <% } %>
+      
+      <div class="user-info">
+        <% if (user.avatar) { %>
+        <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png" alt="<%= user.username %>">
+        <% } else { %>
+        <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="<%= user.username %>">
+        <% } %>
+        <span><%= user.username %></span>
+        <a href="/logout" class="btn btn-secondary btn-sm">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="hero" style="padding: 2rem;">
+      <h1 style="font-size: 2rem;">My Selections</h1>
+      <p>Manage your selected products for automated checkout</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Your Selected Products</h2>
+        <span class="badge badge-info"><%= selections.length %> Products</span>
+      </div>
+      
+      <% if (selections && selections.length > 0) { %>
+      <div class="product-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+        <% selections.forEach(function(sel) { %>
+        <div class="product-card">
+          <div class="product-name"><%= sel.product_name %></div>
+          <div class="product-sku">SKU: <%= sel.sku %></div>
+          <div class="product-description"><%= sel.category %></div>
+          
+          <div class="qty-row" style="margin: 1rem 0;">
+            <label>Quantity:</label>
+            <span><%= sel.quantity %></span>
+          </div>
+          
+          <form action="/selections/<%= sel.id %>" method="POST" style="display: inline; width: 100%;" onsubmit="this.method='DELETE'; return true;">
+            <input type="hidden" name="_method" value="DELETE">
+            <button type="submit" class="btn btn-danger" style="width: 100%;">Remove from Selections</button>
+          </form>
+        </div>
+        <% }); %>
+      </div>
+      <% } else { %>
+      <div class="empty-state">
+        <div class="empty-state-icon">BOX</div>
+        <p>You haven't selected any products yet.</p>
+        <a href="/products" class="btn btn-primary mt-2">Browse Products</a>
+      </div>
+      <% } %>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header">
+        <h2 class="card-title">How It Works</h2>
+      </div>
+      <div style="color: var(--text-secondary);">
+        <p>Select products you want our automated checkout bot to try and purchase. When a release drops, the bot will attempt to checkout your selected items with the quantities you specify.</p>
+        <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+          <li>Select products from the Products page</li>
+          <li>Specify your desired quantity (or "No Limit" for as many as possible)</li>
+          <li>When a release drops, the bot will attempt checkout automatically</li>
+          <li>Track your checkout results in My Checkouts</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>AC LIVEFAST ACO - Automated Checkout Services</p>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

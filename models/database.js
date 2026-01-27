@@ -39,11 +39,18 @@ async function initDatabase() {
     "sku TEXT, " +
     "category TEXT NOT NULL, " +
     "description TEXT, " +
+    "url TEXT, " +
     "active INTEGER DEFAULT 1, " +
-    "tcin TEXT, " +
     "image TEXT, " +
     "created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"
   );
+  
+  // Add url column if it doesn't exist (for existing databases)
+  try {
+    db.run("ALTER TABLE products ADD COLUMN url TEXT");
+  } catch (e) {
+    // Column already exists, ignore
+  }
   
   db.run(
     "CREATE TABLE IF NOT EXISTS checkouts (" +

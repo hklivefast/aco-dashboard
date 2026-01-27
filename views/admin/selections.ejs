@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>All Checkouts - LIVEFAST ACO</title>
+  <title>Member Selections - LIVEFAST ACO</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -35,11 +35,11 @@
 
   <main class="container">
     <div class="d-flex justify-between align-center mb-3" style="flex-wrap: wrap; gap: 1rem;">
-      <h1 style="font-size: 1.5rem;">All Checkouts</h1>
+      <h1 style="font-size: 1.5rem;">Member Product Selections</h1>
     </div>
 
     <div class="card">
-      <% if (checkouts.length > 0) { %>
+      <% if (selections.length > 0) { %>
       <div class="table-container">
         <table>
           <thead>
@@ -47,26 +47,22 @@
               <th>User</th>
               <th>Product</th>
               <th>SKU</th>
-              <th>Qty</th>
-              <th>Status</th>
-              <th>Notes</th>
-              <th>Date</th>
+              <th>Category</th>
+              <th>Quantity</th>
+              <th>Selected</th>
             </tr>
           </thead>
           <tbody>
-            <% checkouts.forEach(function(checkout) { %>
+            <% selections.forEach(function(selection) { %>
             <tr>
-              <td><%= checkout.username %></td>
-              <td><%= checkout.product_name || 'Unknown' %></td>
-              <td><code><%= checkout.sku || '-' %></code></td>
-              <td><%= checkout.quantity %></td>
               <td>
-                <span class="badge badge-<%= checkout.status === 'success' ? 'success' : (checkout.status === 'pending' ? 'warning' : (checkout.status === 'processing' ? 'info' : 'danger')) %>">
-                  <%= checkout.status %>
-                </span>
+                <strong><%= selection.username %></strong>
               </td>
-              <td><%= checkout.notes || '-' %></td>
-              <td><%= new Date(checkout.created_at).toLocaleString() %></td>
+              <td><%= selection.product_name %></td>
+              <td><code><%= selection.sku %></code></td>
+              <td><span class="badge badge-info"><%= selection.category %></span></td>
+              <td><%= selection.quantity %></td>
+              <td><%= new Date(selection.created_at).toLocaleString() %></td>
             </tr>
             <% }); %>
           </tbody>
@@ -74,8 +70,8 @@
       </div>
       <% } else { %>
       <div class="empty-state">
-        <div class="empty-state-icon">CART</div>
-        <p>No checkouts yet.</p>
+        <div class="empty-state-icon">BOX</div>
+        <p>No member selections yet.</p>
       </div>
       <% } %>
     </div>

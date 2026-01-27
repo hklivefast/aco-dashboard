@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard - ACO Dashboard</title>
+  <title>Admin Dashboard - LIVEFAST ACO</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
 <body>
   <nav class="navbar">
     <a href="/" class="navbar-brand">
-      <span>⚡</span> ACO Dashboard
+      <span>AC</span> LIVEFAST ACO
     </a>
     
     <div class="navbar-nav">
@@ -35,56 +35,62 @@
 
   <main class="container">
     <div class="hero" style="padding: 2rem;">
-      <h1 style="font-size: 2rem;">⚙️ Admin Dashboard</h1>
-      <p>Manage your ACO Dashboard</p>
+      <h1 style="font-size: 2rem;">Admin Dashboard</h1>
+      <p>Manage your LIVEFAST ACO Dashboard</p>
     </div>
 
     <div class="grid grid-4">
       <div class="stat-card">
         <div class="stat-value"><%= stats.totalUsers %></div>
-        <div class="stat-label">👥 Users</div>
+        <div class="stat-label">Users</div>
       </div>
       <div class="stat-card">
         <div class="stat-value"><%= stats.totalProducts %></div>
-        <div class="stat-label">📦 Products</div>
+        <div class="stat-label">Products</div>
       </div>
       <div class="stat-card">
         <div class="stat-value"><%= stats.totalCheckouts %></div>
-        <div class="stat-label">🛒 Checkouts</div>
+        <div class="stat-label">Checkouts</div>
       </div>
       <div class="stat-card">
         <div class="stat-value"><%= stats.totalReleases %></div>
-        <div class="stat-label">📅 Releases</div>
+        <div class="stat-label">Releases</div>
       </div>
     </div>
 
     <div class="grid grid-2 mt-3">
       <div class="card">
         <div class="card-header">
-          <h2 class="card-title">🚀 Quick Links</h2>
+          <h2 class="card-title">Quick Links</h2>
         </div>
         <div class="d-flex flex-column gap-2">
           <a href="/admin/products" class="btn btn-secondary" style="justify-content: flex-start;">
-            <span>📦</span> Manage Products
+            Manage Products
           </a>
           <a href="/admin/releases" class="btn btn-secondary" style="justify-content: flex-start;">
-            <span>📅</span> Manage Releases
+            Manage Releases
+          </a>
+          <a href="/admin/selections" class="btn btn-secondary" style="justify-content: flex-start;">
+            Member Selections
           </a>
           <a href="/admin/signups" class="btn btn-secondary" style="justify-content: flex-start;">
-            <span>📝</span> View Signups
+            View Signups
           </a>
           <a href="/admin/checkouts" class="btn btn-secondary" style="justify-content: flex-start;">
-            <span>🛒</span> All Checkouts
+            All Checkouts
           </a>
           <a href="/admin/members" class="btn btn-secondary" style="justify-content: flex-start;">
-            <span>👥</span> Member List
+            Member List
+          </a>
+          <a href="/admin/manage-admins" class="btn btn-warning" style="justify-content: flex-start;">
+            Manage Admins
           </a>
         </div>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <h2 class="card-title">🕐 Recent Signups</h2>
+          <h2 class="card-title">Recent Signups</h2>
         </div>
         
         <% if (stats.recentSignups && stats.recentSignups.length > 0) { %>
@@ -110,7 +116,7 @@
         </div>
         <% } else { %>
         <div class="empty-state">
-          <div class="empty-state-icon">📝</div>
+          <div class="empty-state-icon">USERS</div>
           <p>No recent signups</p>
         </div>
         <% } %>
@@ -119,7 +125,7 @@
   </main>
 
   <footer class="footer">
-    <p>⚡ ACO Dashboard — Automated Checkout Services</p>
+    <p>AC LIVEFAST ACO - Automated Checkout Services</p>
   </footer>
 
   <script src="/js/app.js"></script>

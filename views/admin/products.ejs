@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manage Products - ACO Dashboard</title>
+  <title>Manage Products - LIVEFAST ACO</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
 <body>
   <nav class="navbar">
     <a href="/" class="navbar-brand">
-      <span>⚡</span> ACO Dashboard
+      <span>AC</span> LIVEFAST ACO
     </a>
     
     <div class="navbar-nav">
@@ -35,7 +35,7 @@
 
   <main class="container">
     <div class="d-flex justify-between align-center mb-3" style="flex-wrap: wrap; gap: 1rem;">
-      <h1 style="font-size: 1.5rem;">📦 Manage Products</h1>
+      <h1 style="font-size: 1.5rem;">Manage Products</h1>
       <button class="btn btn-primary" onclick="openProductModal()">+ Add Product</button>
     </div>
 
@@ -65,7 +65,7 @@
               </td>
               <td>
                 <div class="d-flex gap-1">
-                  <button class="btn btn-secondary btn-sm" onclick="editProduct('<%= product.id %>', '<%= product.name.replace(/'/g, "\\'") %>', '<%= product.sku %>', '<%= product.category %>', '<%= product.description ? product.description.replace(/'/g, "\\'") : '' %>', <%= product.active %>)">
+                  <button class="btn btn-secondary btn-sm" onclick="editProduct('<%= product.id %>', '<%= product.name.replace(/'/g, "\\'") %>', '<%= product.sku %>', '<%= product.category %>', '<%= product.description ? product.description.replace(/'/g, "\\'") : '' %>', '<%= product.url || '' %>', <%= product.active %>)">
                     Edit
                   </button>
                   <form action="/admin/products/<%= product.id %>" method="DELETE" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this product?');">
@@ -80,7 +80,7 @@
       </div>
       <% } else { %>
       <div class="empty-state">
-        <div class="empty-state-icon">📦</div>
+        <div class="empty-state-icon">BOX</div>
         <p>No products yet. Add your first product!</p>
       </div>
       <% } %>
@@ -88,7 +88,7 @@
   </main>
 
   <footer class="footer">
-    <p>⚡ ACO Dashboard — Automated Checkout Services</p>
+    <p>AC LIVEFAST ACO - Automated Checkout Services</p>
   </footer>
 
   <!-- Add/Edit Product Modal -->
@@ -122,6 +122,11 @@
         </div>
         
         <div class="form-group">
+          <label class="form-label">Product URL</label>
+          <input type="url" class="form-control" name="url" id="productUrl" placeholder="https://target.com/...">
+        </div>
+        
+        <div class="form-group">
           <label class="form-label">Description</label>
           <textarea class="form-control" name="description" id="productDescription" rows="3" placeholder="Enter description"></textarea>
         </div>
@@ -151,13 +156,14 @@
     document.getElementById('productName').value = '';
     document.getElementById('productSku').value = '';
     document.getElementById('productCategory').value = 'Pokemon - Target';
+    document.getElementById('productUrl').value = '';
     document.getElementById('productDescription').value = '';
     document.getElementById('productActive').checked = true;
     document.getElementById('productSubmitBtn').textContent = 'Add Product';
     document.getElementById('productModal').classList.add('active');
   }
 
-  function editProduct(id, name, sku, category, description, active) {
+  function editProduct(id, name, sku, category, description, url, active) {
     document.getElementById('productModalTitle').textContent = 'Edit Product';
     document.getElementById('productForm').action = '/admin/products/' + id;
     document.getElementById('productMethod').value = 'PUT';
@@ -165,6 +171,7 @@
     document.getElementById('productName').value = name;
     document.getElementById('productSku').value = sku;
     document.getElementById('productCategory').value = category;
+    document.getElementById('productUrl').value = url || '';
     document.getElementById('productDescription').value = description;
     document.getElementById('productActive').checked = active;
     document.getElementById('productSubmitBtn').textContent = 'Save Changes';
