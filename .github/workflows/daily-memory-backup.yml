@@ -1,0 +1,40 @@
+name: Daily Memory Backup
+
+on:
+  schedule:
+    # Run daily at 10pm EST (3:00am UTC)
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+  push:
+    paths:
+      - 'ACO_MEMORY.md'
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+      - name: Copy memory file with date
+        run: |
+          TODAY=$(date +%Y-%m-%d)
+          cp ACO_MEMORY.md memory/${TODAY}-aco-dashboard.md
+          echo "✅ Backed up to memory/${TODAY}-aco-dashboard.md"
+          
+      - name: Commit and push if changed
+        run: |
+          TODAY=$(date +%Y-%m-%d)
+          if git status --porcelain | grep -q .; then
+            git add memory/${TODAY}-aco-dashboard.md
+            git commit -m "Daily memory backup - ${TODAY}"
+            git push
+            echo "✅ Pushed daily memory backup"
+          else
+            echo "ℹ️ No changes to commit"
+          fi
