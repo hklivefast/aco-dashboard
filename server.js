@@ -809,17 +809,6 @@ app.use((err, req, res, next) => {
 
 // Initialize database and start server
 async function start() {
-  try {
-    await initDatabase();
-    console.log('Database initialized');
-    
-    app.listen(PORT, () => {
-      console.log(`ACO Dashboard running on http://localhost:${PORT}`);
-    });
-  } catch (e) {
-    console.error('Failed to start:', e);
-    process.exit(1);
-  }
 }
 
 start();
