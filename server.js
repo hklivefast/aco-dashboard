@@ -219,7 +219,7 @@ app.get('/dashboard', ensureAuth, async (req, res) => {
     const dbPath = path.join(__dirname, 'data', 'aco.db');
     
     if (!fs.existsSync(dbPath)) {
-      return res.render('dashboard', { products: [], checkouts: [], releases: [], user: req.user });
+      return res.render('dashboard', { products: [], checkouts: [], releases: [], selections: [], user: req.user });
     }
     
     const SQL = await initSqlJs();
@@ -247,10 +247,17 @@ app.get('/dashboard', ensureAuth, async (req, res) => {
       return obj;
     }) : [];
     
-    res.render('dashboard', { products, checkouts, releases, user: req.user });
+    const selectionsResult = db.exec(`SELECT * FROM product_selections WHERE user_id = '${req.user.id}'`);
+    const selections = selectionsResult.length > 0 ? selectionsResult[0].values.map(row => {
+      const obj = {};
+      selectionsResult[0].columns.forEach((col, i) => obj[col] = row[i]);
+      return obj;
+    }) : [];
+    
+    res.render('dashboard', { products, checkouts, releases, selections, user: req.user });
   } catch (e) {
     console.error('Dashboard error:', e);
-    res.render('dashboard', { products: [], checkouts: [], releases: [], user: req.user });
+    res.render('dashboard', { products: [], checkouts: [], releases: [], selections: [], user: req.user });
   }
 });
 
