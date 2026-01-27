@@ -1,0 +1,61 @@
+<div class="d-flex justify-between align-center mb-3">
+  <h1>Members</h1>
+</div>
+
+<div class="card">
+  <% if (members.length > 0) { %>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Avatar</th>
+          <th>Username</th>
+          <th>Discord ID</th>
+          <th>Role</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% members.forEach(function(member) { %>
+        <tr>
+          <td>
+            <% if (member.avatar) { %>
+            <img src="https://cdn.discordapp.com/avatars/<%= member.id %>/<%= member.avatar %>.png" alt="<%= member.username %>" style="width: 32px; height: 32px; border-radius: 50%;">
+            <% } else { %>
+            <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="<%= member.username %>" style="width: 32px; height: 32px; border-radius: 50%;">
+            <% } %>
+          </td>
+          <td><%= member.username %></td>
+          <td><code><%= member.id %></code></td>
+          <td>
+            <% if (member.is_admin) { %>
+            <span class="badge badge-warning">Admin</span>
+            <% } else { %>
+            <span class="badge badge-info">Member</span>
+            <% } %>
+          </td>
+          <td><%= new Date(member.created_at).toLocaleDateString() %></td>
+          <td>
+            <% if (member.is_admin) { %>
+            <form action="/admin/members/<%= member.id %>/demote" method="POST" style="display: inline;">
+              <button type="submit" class="btn btn-danger btn-sm">Demote</button>
+            </form>
+            <% } else { %>
+            <form action="/admin/members/<%= member.id %>/promote" method="POST" style="display: inline;">
+              <button type="submit" class="btn btn-success btn-sm">Promote</button>
+            </form>
+            <% } %>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+  <% } else { %>
+  <div class="empty-state">
+    <p class="empty-state-icon">👥</p>
+    <p>No members yet.</p>
+  </div>
+  <% } %>
+</div>

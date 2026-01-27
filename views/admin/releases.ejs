@@ -1,0 +1,125 @@
+<div class="d-flex justify-between align-center mb-3">
+  <h1>Manage Releases</h1>
+  <button class="btn btn-primary" onclick="openReleaseModal()">Add Release</button>
+</div>
+
+<div class="card">
+  <% if (releases.length > 0) { %>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Release Date</th>
+          <th>Google Form</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% releases.forEach(function(release) { %>
+        <tr>
+          <td><%= release.name %></td>
+          <td><%= new Date(release.release_date).toLocaleDateString() %></td>
+          <td>
+            <% if (release.google_form_url) { %>
+            <a href="<%= release.google_form_url %>" target="_blank" class="btn btn-outline btn-sm">View Form</a>
+            <% } else { %>
+            <span style="color: var(--gray);">No form</span>
+            <% } %>
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              <button class="btn btn-outline btn-sm" onclick="editRelease('<%= release.id %>', '<%= release.name.replace(/'/g, "\\'") %>', '<%= release.release_date %>', '<%= release.google_form_url || '' %>', '<%= release.description ? release.description.replace(/'/g, "\\'") : '' %>')">
+                Edit
+              </button>
+              <form action="/admin/releases/<%= release.id %>" method="DELETE" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this release?');">
+                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+  <% } else { %>
+  <div class="empty-state">
+    <p class="empty-state-icon">📅</p>
+    <p>No releases yet. Add your first release!</p>
+  </div>
+  <% } %>
+</div>
+
+<!-- Add/Edit Release Modal -->
+<div class="modal-overlay" id="releaseModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="releaseModalTitle">Add Release</h3>
+      <button class="modal-close" onclick="closeReleaseModal()">&times;</button>
+    </div>
+    <form id="releaseForm" action="/admin/releases" method="POST">
+      <input type="hidden" name="id" id="releaseId">
+      
+      <div class="form-group">
+        <label class="form-label">Release Name *</label>
+        <input type="text" class="form-control" name="name" id="releaseName" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Release Date *</label>
+        <input type="date" class="form-control" name="release_date" id="releaseDate" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Google Form URL</label>
+        <input type="url" class="form-control" name="google_form_url" id="releaseFormUrl" placeholder="https://forms.google.com/...">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" name="description" id="releaseDescription" rows="3"></textarea>
+      </div>
+      
+      <div class="d-flex gap-1 justify-between">
+        <button type="button" class="btn btn-outline" onclick="closeReleaseModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="releaseSubmitBtn">Add Release</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openReleaseModal() {
+  document.getElementById('releaseModalTitle').textContent = 'Add Release';
+  document.getElementById('releaseForm').action = '/admin/releases';
+  document.getElementById('releaseId').value = '';
+  document.getElementById('releaseName').value = '';
+  document.getElementById('releaseDate').value = '';
+  document.getElementById('releaseFormUrl').value = '';
+  document.getElementById('releaseDescription').value = '';
+  document.getElementById('releaseSubmitBtn').textContent = 'Add Release';
+  document.getElementById('releaseModal').classList.add('active');
+}
+
+function editRelease(id, name, date, formUrl, description) {
+  document.getElementById('releaseModalTitle').textContent = 'Edit Release';
+  document.getElementById('releaseForm').action = '/admin/releases/' + id;
+  document.getElementById('releaseId').value = id;
+  document.getElementById('releaseName').value = name;
+  document.getElementById('releaseDate').value = date;
+  document.getElementById('releaseFormUrl').value = formUrl;
+  document.getElementById('releaseDescription').value = description;
+  document.getElementById('releaseSubmitBtn').textContent = 'Save Changes';
+  document.getElementById('releaseModal').classList.add('active');
+}
+
+function closeReleaseModal() {
+  document.getElementById('releaseModal').classList.remove('active');
+}
+
+document.getElementById('releaseModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeReleaseModal();
+  }
+});
+</script>

@@ -1,0 +1,71 @@
+<div class="hero">
+  <h1>Admin Dashboard ⚙️</h1>
+  <p>Manage your ACO Dashboard</p>
+</div>
+
+<div class="grid grid-4">
+  <div class="card stat-card">
+    <div class="stat-value"><%= stats.totalUsers %></div>
+    <div class="stat-label">Total Users</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-value"><%= stats.totalProducts %></div>
+    <div class="stat-label">Products</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-value"><%= stats.totalCheckouts %></div>
+    <div class="stat-label">Checkouts</div>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-value"><%= stats.totalReleases %></div>
+    <div class="stat-label">Releases</div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Quick Links</h2>
+    </div>
+    <div class="d-flex flex-column gap-1">
+      <a href="/admin/products" class="btn btn-outline">Manage Products</a>
+      <a href="/admin/releases" class="btn btn-outline">Manage Releases</a>
+      <a href="/admin/signups" class="btn btn-outline">View Signups</a>
+      <a href="/admin/checkouts" class="btn btn-outline">All Checkouts</a>
+      <a href="/admin/members" class="btn btn-outline">Member List</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Recent Signups</h2>
+    </div>
+    
+    <% if (stats.recentSignups && stats.recentSignups.length > 0) { %>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Release</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% stats.recentSignups.forEach(function(signup) { %>
+          <tr>
+            <td><%= signup.username %></td>
+            <td><%= signup.release_name %></td>
+            <td><%= new Date(signup.created_at).toLocaleDateString() %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+    <% } else { %>
+    <div class="empty-state">
+      <p>No recent signups</p>
+    </div>
+    <% } %>
+  </div>
+</div>

@@ -1,0 +1,103 @@
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Product Catalog</h2>
+  </div>
+  
+  <div class="category-tabs">
+    <a href="/products" class="category-tab <%= !selectedCategory ? 'active' : '' %>">All Products</a>
+    <a href="/products?category=Pokemon%20-%20Target" class="category-tab <%= selectedCategory === 'Pokemon - Target' ? 'active' : '' %>">🎴 Pokemon - Target</a>
+    <a href="/products?category=Sports%20Cards" class="category-tab <%= selectedCategory === 'Sports Cards' ? 'active' : '' %>">🏀 Sports Cards</a>
+    <a href="/products?category=One%20Piece" class="category-tab <%= selectedCategory === 'One Piece' ? 'active' : '' %>">🏴‍☠️ One Piece</a>
+  </div>
+  
+  <% if (products.length > 0) { %>
+  <div class="product-grid">
+    <% products.forEach(function(product) { %>
+    <div class="product-card">
+      <div class="product-name"><%= product.name %></div>
+      <div class="product-sku">SKU: <%= product.sku %></div>
+      <div class="product-description"><%= product.description %></div>
+      <div class="d-flex gap-1 mt-2 align-center justify-between">
+        <span class="badge badge-info"><%= product.category %></span>
+        <button class="btn btn-primary btn-sm" onclick="openCheckoutModal('<%= product.id %>', '<%= product.name.replace(/'/g, "\\'") %>', '<%= product.sku %>')">
+          Add to Checkout
+        </button>
+      </div>
+    </div>
+    <% }); %>
+  </div>
+  <% } else { %>
+  <div class="empty-state">
+    <p class="empty-state-icon">📦</p>
+    <p>No products found in this category.</p>
+  </div>
+  <% } %>
+</div>
+
+<!-- Checkout Modal -->
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add Checkout</h3>
+      <button class="modal-close" onclick="closeCheckoutModal()">&times;</button>
+    </div>
+    <form action="/checkouts" method="POST">
+      <input type="hidden" name="product_id" id="checkoutProductId">
+      
+      <div class="form-group">
+        <label class="form-label">Product</label>
+        <input type="text" class="form-control" id="checkoutProductName" readonly>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">SKU</label>
+        <input type="text" class="form-control" name="sku" id="checkoutSku" readonly>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Quantity</label>
+        <input type="number" class="form-control" name="quantity" value="1" min="1" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-control" name="status">
+          <option value="pending">Pending</option>
+          <option value="processing">Processing</option>
+          <option value="success">Success</option>
+          <option value="failed">Failed</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Notes (optional)</label>
+        <textarea class="form-control" name="notes" rows="3" placeholder="Any additional notes..."></textarea>
+      </div>
+      
+      <div class="d-flex gap-1 justify-between">
+        <button type="button" class="btn btn-outline" onclick="closeCheckoutModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add Checkout</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openCheckoutModal(productId, productName, sku) {
+  document.getElementById('checkoutProductId').value = productId;
+  document.getElementById('checkoutProductName').value = productName;
+  document.getElementById('checkoutSku').value = sku;
+  document.getElementById('checkoutModal').classList.add('active');
+}
+
+function closeCheckoutModal() {
+  document.getElementById('checkoutModal').classList.remove('active');
+}
+
+// Close modal on overlay click
+document.getElementById('checkoutModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeCheckoutModal();
+  }
+});
+</script>

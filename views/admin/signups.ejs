@@ -1,0 +1,43 @@
+<div class="d-flex justify-between align-center mb-3">
+  <h1>Release Signups</h1>
+</div>
+
+<div class="card">
+  <% if (signups.length > 0) { %>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Discord ID</th>
+          <th>Release</th>
+          <th>Form URL</th>
+          <th>Signed Up</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% signups.forEach(function(signup) { %>
+        <tr>
+          <td><%= signup.username %></td>
+          <td><code><%= signup.user_discord_id %></code></td>
+          <td><%= signup.release_name %></td>
+          <td>
+            <% if (signup.form_url) { %>
+            <a href="<%= signup.form_url %>" target="_blank" class="btn btn-outline btn-sm">View</a>
+            <% } else { %>
+            <span style="color: var(--gray);">-</span>
+            <% } %>
+          </td>
+          <td><%= new Date(signup.created_at).toLocaleString() %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+  <% } else { %>
+  <div class="empty-state">
+    <p class="empty-state-icon">📝</p>
+    <p>No signups yet.</p>
+  </div>
+  <% } %>
+</div>
