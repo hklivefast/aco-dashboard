@@ -903,6 +903,9 @@ app.post('/selections', ensureAuth, async (req, res) => {
   const { product_id, quantity } = req.body;
   const selectionId = uuidv4();
   
+  // Handle "No Limit" - convert to null for database
+  const qtyValue = (quantity === 'No Limit' || !quantity) ? null : quantity;
+  
   try {
     const fs = require('fs');
     const initSqlJs = require('sql.js');
@@ -917,11 +920,11 @@ app.post('/selections', ensureAuth, async (req, res) => {
       const existing = db.exec(`SELECT * FROM product_selections WHERE user_id = '${req.user.id}' AND product_id = '${product_id}'`);
       if (existing.length > 0 && existing[0].values.length > 0) {
         // Update existing
-        db.run(`UPDATE product_selections SET quantity = '${quantity}' WHERE user_id = '${req.user.id}' AND product_id = '${product_id}'`);
+        db.run(`UPDATE product_selections SET quantity = ? WHERE user_id = '${req.user.id}' AND product_id = '${product_id}'`, [qtyValue]);
       } else {
         // Insert new
         db.run('INSERT INTO product_selections (id, user_id, product_id, quantity) VALUES (?, ?, ?, ?)',
-          [selectionId, req.user.id, product_id, quantity]);
+          [selectionId, req.user.id, product_id, qtyValue]);
       }
       
       const data = db.export();
@@ -934,7 +937,7 @@ app.post('/selections', ensureAuth, async (req, res) => {
     req.flash('error_msg', 'Error adding product selection');
   }
   
-  res.redirect('/dashboard');
+  res.redirect('/products');
 });
 
 // Remove product selection
