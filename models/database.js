@@ -83,14 +83,20 @@ async function initDatabase() {
     "created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"
   );
   
-  db.run(
-    "CREATE TABLE IF NOT EXISTS product_selections (" +
-    "id TEXT PRIMARY KEY, " +
-    "user_id TEXT NOT NULL, " +
-    "product_id TEXT NOT NULL, " +
-    "quantity TEXT, " +
-    "created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"
-  );
+  // Migration: Create product_selections table if it doesn't exist
+  // Using try-catch because CREATE TABLE IF NOT EXISTS may not work on existing DBs
+  try {
+    db.run(
+      "CREATE TABLE product_selections (" +
+      "id TEXT PRIMARY KEY, " +
+      "user_id TEXT NOT NULL, " +
+      "product_id TEXT NOT NULL, " +
+      "quantity TEXT, " +
+      "created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"
+    );
+  } catch (e) {
+    // Table already exists, ignore error
+  }
   
   const productCount = db.exec('SELECT COUNT(*) as count FROM products');
   const count = productCount.length > 0 ? productCount[0].values[0][0] : 0;
