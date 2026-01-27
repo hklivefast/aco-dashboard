@@ -1,5 +1,33 @@
-<div class="card" style="text-align: center; padding: 3rem;">
-  <h1 class="mb-2">Oops! Something went wrong</h1>
-  <p class="mb-3" style="color: var(--gray);"><%= error.message || error %></p>
-  <a href="/" class="btn btn-primary">Go Home</a>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error - ACO Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <span>⚡</span> ACO Dashboard
+    </a>
+  </nav>
+
+  <main class="container">
+    <div class="card" style="text-align: center; padding: 3rem;">
+      <h1 class="mb-2">Oops! Something went wrong</h1>
+      <p class="mb-3" style="color: var(--text-secondary);"><%= error.message || error %></p>
+      <a href="/" class="btn btn-primary">Go Home</a>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>⚡ ACO Dashboard — Automated Checkout Services</p>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
