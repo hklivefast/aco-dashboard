@@ -190,4 +190,8 @@ function seedReleases() {
   console.log('Database seeded with initial releases');
 }
 
-module.exports = { initDatabase, saveDatabase };
+function getDb() {
+  return db;
+}
+
+module.exports = { initDatabase, saveDatabase, getDb };
