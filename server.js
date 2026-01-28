@@ -947,7 +947,7 @@ app.use((err, req, res, next) => {
 // ============ PRODUCT SELECTIONS ROUTES ============
 
 // Add product selection
-app.post('/selections', ensureAuth, async (req, res) => {
+app.post('/selections', ensureAuth, (req, res) => {
   const { product_id, quantity } = req.body;
   
   if (!product_id) {
@@ -959,8 +959,8 @@ app.post('/selections', ensureAuth, async (req, res) => {
   const qtyValue = (quantity === 'No Limit' || !quantity || quantity === 'null') ? null : quantity;
   
   try {
-    const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = getDb();
+    const { getDb } = require('./models/database');
+    const db = getDb();
     const fs = require('fs');
     
     if (!db) {
@@ -1238,7 +1238,7 @@ if (originalDashboard) {
 
 async function start() {
   try {
-    await initDatabase();
+    initDatabaseSync();
     console.log('Database initialized');
     app.listen(PORT, () => {
       console.log(`ACO Dashboard running on http://localhost:${PORT}`);
