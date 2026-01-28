@@ -105,4 +105,4 @@ async function initDatabase() {
   return getDb();
 }
 
-module.exports = { initDatabase, saveDatabase, getDb, initDatabaseSync };
+module.exports = { initDatabase: initDatabaseSync, saveDatabase, getDb, initDatabaseSync };
