@@ -11,60 +11,33 @@ if (!fs.existsSync(dataDir)) {
 
 let db = null;
 let SQL = null;
-let initPromise = null;
+let initialized = false;
 
-// Get or load SQL.js (cached)
-async function getSQL() {
-  if (SQL) return SQL;
+// Initialize database synchronously
+function initDatabaseSync() {
+  if (initialized) return db;
   
-  SQL = await initSqlJs();
-  return SQL;
-}
-
-async function initDatabase() {
-  if (initPromise) return initPromise;
-  
-  initPromise = (async () => {
-    const SQLModule = await getSQL();
+  try {
+    SQL = require('sql.js');
     
     if (fs.existsSync(DB_PATH)) {
       const fileBuffer = fs.readFileSync(DB_PATH);
-      db = new SQLModule.Database(fileBuffer);
+      db = new SQL.Database(fileBuffer);
     } else {
-      db = new SQLModule.Database();
+      db = new SQL.Database();
     }
     
-    // Create tables if they don't exist
-    const tables = db.exec("SELECT name FROM sqlite_master WHERE type='table'");
-    const tableNames = tables.length > 0 ? tables[0].values.flat() : [];
-    
-    if (!tableNames.includes('users')) {
-      db.run("CREATE TABLE users (id TEXT PRIMARY KEY, username TEXT NOT NULL, discriminator TEXT, avatar TEXT, is_admin INTEGER DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
-    }
-    
-    if (!tableNames.includes('products')) {
-      db.run("CREATE TABLE products (id TEXT PRIMARY KEY, name TEXT NOT NULL, sku TEXT, category TEXT NOT NULL, description TEXT, active INTEGER DEFAULT 1, tcin TEXT, image TEXT, url TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
-    }
-    
-    if (!tableNames.includes('checkouts')) {
-      db.run("CREATE TABLE checkouts (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, product_id TEXT, sku TEXT, quantity INTEGER DEFAULT 1, status TEXT DEFAULT 'pending', notes TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
-    }
-    
-    if (!tableNames.includes('releases')) {
-      db.run("CREATE TABLE releases (id TEXT PRIMARY KEY, name TEXT NOT NULL, release_date DATE NOT NULL, google_form_url TEXT, description TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
-    }
-    
-    if (!tableNames.includes('release_signups')) {
-      db.run("CREATE TABLE release_signups (id TEXT PRIMARY KEY, release_id TEXT NOT NULL, user_id TEXT NOT NULL, form_url TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
-    }
-    
-    if (!tableNames.includes('product_selections')) {
-      db.run("CREATE TABLE product_selections (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, product_id TEXT NOT NULL, quantity TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
-    }
+    // Create tables
+    db.run("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, username TEXT NOT NULL, discriminator TEXT, avatar TEXT, is_admin INTEGER DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
+    db.run("CREATE TABLE IF NOT EXISTS products (id TEXT PRIMARY KEY, name TEXT NOT NULL, sku TEXT, category TEXT NOT NULL, description TEXT, active INTEGER DEFAULT 1, tcin TEXT, image TEXT, url TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
+    db.run("CREATE TABLE IF NOT EXISTS checkouts (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, product_id TEXT, sku TEXT, quantity INTEGER DEFAULT 1, status TEXT DEFAULT 'pending', notes TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
+    db.run("CREATE TABLE IF NOT EXISTS releases (id TEXT PRIMARY KEY, name TEXT NOT NULL, release_date DATE NOT NULL, google_form_url TEXT, description TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
+    db.run("CREATE TABLE IF NOT EXISTS release_signups (id TEXT PRIMARY KEY, release_id TEXT NOT NULL, user_id TEXT NOT NULL, form_url TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
+    db.run("CREATE TABLE IF NOT EXISTS product_selections (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, product_id TEXT NOT NULL, quantity TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)");
     
     // Seed products if none exist
-    const productCount = db.exec('SELECT COUNT(*) as count FROM products');
-    const count = productCount.length > 0 ? productCount[0].values[0][0] : 0;
+    const result = db.exec('SELECT COUNT(*) as count FROM products');
+    const count = result.length > 0 ? result[0].values[0][0] : 0;
     
     if (count === 0) {
       const { v4: uuidv4 } = require('uuid');
@@ -98,17 +71,20 @@ async function initDatabase() {
           db.run('INSERT INTO products (id, name, sku, category, description, active) VALUES (?, ?, ?, ?, ?, ?)',
             [uuidv4(), product.name, product.sku, product.category, product.description, product.active]);
         } catch (e) {
-          // Ignore duplicate errors
+          // Ignore
         }
       }
       console.log('Database seeded with initial products');
     }
     
     saveDatabase();
-    return db;
-  })();
+    initialized = true;
+    console.log('Database initialized');
+  } catch (e) {
+    console.error('Database init error:', e);
+  }
   
-  return initPromise;
+  return db;
 }
 
 function saveDatabase() {
@@ -120,16 +96,13 @@ function saveDatabase() {
 }
 
 function getDb() {
-  return db;
+  return db || initDatabaseSync();
 }
 
-async function getDbWithSQL() {
-  if (!initPromise) {
-    // If initDatabase hasn't been called yet, initialize now
-    await initDatabase();
-  }
-  await initPromise; // Wait for initialization
-  return { db, SQL };
+async function initDatabase() {
+  // For async initialization - wait for sync init then return
+  initDatabaseSync();
+  return getDb();
 }
 
-module.exports = { initDatabase, saveDatabase, getDb, getDbWithSQL, getSQL };
+module.exports = { initDatabase, saveDatabase, getDb, initDatabaseSync };

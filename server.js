@@ -69,7 +69,7 @@ app.use(async (req, res, next) => {
       const dbPath = path.join(__dirname, 'data', 'aco.db');
       if (fs.existsSync(dbPath)) {
         const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
         
         const result = db.exec(`SELECT is_admin FROM users WHERE id = '${req.user.id}'`);
@@ -99,7 +99,7 @@ async function isUserAdmin(userId) {
     const dbPath = path.join(__dirname, 'data', 'aco.db');
     if (fs.existsSync(dbPath)) {
       const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
       
       const result = db.exec(`SELECT is_admin FROM users WHERE id = '${userId}'`);
@@ -188,7 +188,7 @@ app.get('/auth/discord/callback', passport.authenticate('discord', {
     
     if (fs.existsSync(dbPath)) {
       const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
       
       db.run('INSERT OR REPLACE INTO users (id, username, discriminator, avatar, is_admin) VALUES (?, ?, ?, ?, ?)', 
@@ -223,7 +223,7 @@ app.get('/dashboard', ensureAuth, async (req, res) => {
     }
     
     const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
     
     const productsResult = db.exec('SELECT * FROM products ORDER BY category, name');
@@ -265,7 +265,7 @@ app.get('/dashboard', ensureAuth, async (req, res) => {
 app.get('/products', ensureAuth, async (req, res) => {
   try {
     const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     const fs = require('fs');
     
     if (!db) {
@@ -305,7 +305,7 @@ app.post('/checkouts', ensureAuth, async (req, res) => {
     
     if (fs.existsSync(dbPath)) {
       const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
       
       db.run('INSERT INTO checkouts (id, user_id, product_id, sku, quantity, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -335,7 +335,7 @@ app.put('/checkouts/:id', ensureAuth, async (req, res) => {
     
     if (fs.existsSync(dbPath)) {
       const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
       
       db.run(`UPDATE checkouts SET status = '${status}' WHERE id = '${req.params.id}' AND user_id = '${req.user.id}'`);
@@ -363,7 +363,7 @@ app.get('/releases', ensureAuth, async (req, res) => {
     }
     
     const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
     
     const result = db.exec('SELECT * FROM releases ORDER BY release_date ASC');
@@ -392,7 +392,7 @@ app.post('/releases/:id/signup', ensureAuth, async (req, res) => {
     
     if (fs.existsSync(dbPath)) {
       const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
       
       db.run('INSERT INTO release_signups (id, release_id, user_id, form_url) VALUES (?, ?, ?, ?)',
@@ -424,7 +424,7 @@ app.get('/admin', ensureAdmin, async (req, res) => {
     }
     
     const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
     
     const stats = {};
@@ -477,7 +477,7 @@ app.get('/admin/products', ensureAdmin, async (req, res) => {
     }
     
     const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
     
     const result = db.exec('SELECT * FROM products ORDER BY category, name');
@@ -505,7 +505,7 @@ app.post('/admin/products', ensureAdmin, async (req, res) => {
     
     if (fs.existsSync(dbPath)) {
       const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
       
       db.run('INSERT INTO products (id, name, sku, category, description, url, active) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -534,7 +534,7 @@ app.put('/admin/products/:id', ensureAdmin, async (req, res) => {
     
     if (fs.existsSync(dbPath)) {
       const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
       
       db.run(`UPDATE products SET name = '${name.replace(/'/g, "''")}', sku = '${sku.replace(/'/g, "''")}', category = '${category.replace(/'/g, "''")}', description = '${(description || '').replace(/'/g, "''")}', url = '${(url || '').replace(/'/g, "''")}', active = ${active ? 1 : 0} WHERE id = '${req.params.id}'`);
@@ -558,7 +558,7 @@ app.delete('/admin/products/:id', ensureAdmin, async (req, res) => {
     
     if (fs.existsSync(dbPath)) {
       const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
       
       db.run(`DELETE FROM products WHERE id = '${req.params.id}'`);
@@ -578,7 +578,7 @@ app.delete('/admin/products/:id', ensureAdmin, async (req, res) => {
 app.post('/admin/seed-products', ensureAdmin, async (req, res) => {
   try {
     const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     const { v4: uuidv4 } = require('uuid');
     
     const products = [
@@ -638,7 +638,7 @@ app.get('/admin/releases', ensureAdmin, async (req, res) => {
     }
     
     const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
     
     const result = db.exec('SELECT * FROM releases ORDER BY release_date ASC');
@@ -666,7 +666,7 @@ app.post('/admin/releases', ensureAdmin, async (req, res) => {
     
     if (fs.existsSync(dbPath)) {
       const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
       
       db.run('INSERT INTO releases (id, name, release_date, google_form_url, description) VALUES (?, ?, ?, ?, ?)',
@@ -695,7 +695,7 @@ app.put('/admin/releases/:id', ensureAdmin, async (req, res) => {
     
     if (fs.existsSync(dbPath)) {
       const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
       
       db.run(`UPDATE releases SET name = '${name.replace(/'/g, "''")}', release_date = '${release_date}', google_form_url = '${(google_form_url || '').replace(/'/g, "''")}', description = '${(description || '').replace(/'/g, "''")}' WHERE id = '${req.params.id}'`);
@@ -719,7 +719,7 @@ app.delete('/admin/releases/:id', ensureAdmin, async (req, res) => {
     
     if (fs.existsSync(dbPath)) {
       const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
       
       db.run(`DELETE FROM releases WHERE id = '${req.params.id}'`);
@@ -747,7 +747,7 @@ app.get('/admin/signups', ensureAdmin, async (req, res) => {
     }
     
     const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
     
     const result = db.exec(`
@@ -783,7 +783,7 @@ app.get('/admin/checkouts', ensureAdmin, async (req, res) => {
     }
     
     const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
     
     const result = db.exec(`
@@ -819,7 +819,7 @@ app.get('/admin/members', ensureAdmin, async (req, res) => {
     }
     
     const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
     
     const result = db.exec('SELECT * FROM users ORDER BY username');
@@ -851,7 +851,7 @@ app.post('/admin/members/:id/promote', ensureAdmin, async (req, res) => {
     
     if (fs.existsSync(dbPath)) {
       const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
       
       db.run(`UPDATE users SET is_admin = 1 WHERE id = '${req.params.id}'`);
@@ -883,7 +883,7 @@ app.post('/admin/members/:id/demote', ensureAdmin, async (req, res) => {
     
     if (fs.existsSync(dbPath)) {
       const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
       
       db.run(`UPDATE users SET is_admin = 0 WHERE id = '${req.params.id}'`);
@@ -913,7 +913,7 @@ app.get('/admin/manage-admins', ensureAdmin, async (req, res) => {
     }
     
     const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
     
     const adminsResult = db.exec("SELECT * FROM users WHERE is_admin = 1 ORDER BY username");
@@ -960,7 +960,7 @@ app.post('/selections', ensureAuth, async (req, res) => {
   
   try {
     const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     const fs = require('fs');
     
     if (!db) {
@@ -1008,7 +1008,7 @@ app.delete('/selections/:id', ensureAuth, async (req, res) => {
     
     if (fs.existsSync(dbPath)) {
       const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
       
       db.run(`DELETE FROM product_selections WHERE id = '${req.params.id}' AND user_id = '${req.user.id}'`);
@@ -1036,7 +1036,7 @@ app.get('/my-selections', ensureAuth, async (req, res) => {
     }
     
     const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
     
     const result = db.exec(`
@@ -1074,7 +1074,7 @@ app.get('/my-checkouts', ensureAuth, async (req, res) => {
     }
     
     const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
     
     const result = db.exec(`SELECT * FROM checkouts WHERE user_id = '${req.user.id}' ORDER BY created_at DESC`);
@@ -1108,7 +1108,7 @@ app.post('/webhooks/checkout', async (req, res) => {
     
     if (fs.existsSync(dbPath)) {
       const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
       
       const checkoutId = uuidv4();
@@ -1141,7 +1141,7 @@ app.get('/admin/selections', ensureAdmin, async (req, res) => {
     }
     
     const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
     
     const result = db.exec(`
@@ -1182,7 +1182,7 @@ if (originalDashboard) {
       }
       
       const { getDbWithSQL } = require('./models/database');
-    const { db, SQL } = await getDbWithSQL();
+    const { db, SQL } = getDb();
     // Remove old file read since we use cached db
       
       const productsResult = db.exec('SELECT * FROM products ORDER BY category, name');
